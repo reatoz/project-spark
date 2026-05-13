@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>问题反馈</title>
+  <link rel="stylesheet" href="/common.css">
+  <link rel="stylesheet" href="https://waline.8765876.xyz/issue-widget.css">
+  <style>
+    .issues-container {
+      flex: 1;
+      width: 100%;
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 20px;
+    }
+    .issues-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      color: #fff;
+    }
+    .issues-card h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+  <main class="issues-container">
+    <div class="issues-card">
+      <h2>🐛 问题反馈</h2>
+      <div id="issue-widget"></div>
+    </div>
+  </main>
+
+  <script src="https://waline.8765876.xyz/issue-widget.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.IssueWidget && typeof window.IssueWidget.init === 'function') {
+        window.IssueWidget.init({
+          el: '#issue-widget',
+          serverURL: 'https://waline.8765876.xyz'
+        });
+      } else {
+        console.error('IssueWidget 未加载');
+      }
+    });
+  </script>
+</body>
+</html>

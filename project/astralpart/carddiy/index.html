@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星趴卡牌制作器</title>
+  <link rel="stylesheet" href="/common.css">
+<style>
+/* 字体导入 */
+@import url("https://fontsapi.zeoseven.com/298/main/result.css");
+
+/* ---- 预览卡片样式 ---- */
+.hand-card {
+    display: inline-block;
+}
+.Card {
+    position: relative;
+    width: 362px;
+    height: 530px;
+}
+.Card0 {
+    position: absolute;
+    top: 15px;
+    left: 16px;
+}
+.Card0.dragging {
+    cursor: grabbing;
+}
+.Card00-box-box {
+    position: absolute;
+    display: flex;
+    flex-direction: column;   
+    gap: 2px;
+    top: 79px;
+    left: 25px;
+    width: auto;              
+    align-items: center;     
+}
+.Card00-box-box.effect {
+    top: 76px;               /* 效果类型图标专用位置微调 */
+}
+.Card00-box-box.effect .Card00-box img {
+    transform: translateY(-6.5px);
+}
+.Card00-box {
+    position: relative;
+    width: 32px;
+    height: 32px;
+}
+.Card00-box img {
+    width: 100%;
+    height: 100%;
+}
+.Card00 {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 20px;
+    height: 20px;
+}
+.Card00 img {
+    width: 100%;
+    height: 100%;
+}
+.Card1 {
+    position: absolute;
+    top: 310px;
+    left: 70px;
+    width: 222px;
+    height: 55px;
+}
+.Card1Font {
+    position: absolute;
+    top: 310px;
+    left: 70px;
+    width: 222px;
+    height: 55px;
+    color: white;
+    font-size: 23px;
+    letter-spacing: 0.2em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 3px 0 0 #000, 2.77px 1.15px 0 #000, 2.12px 2.12px 0 #000, 1.15px 2.77px 0 #000, 0 3px 0 #000, -1.15px 2.77px 0 #000, -2.12px 2.12px 0 #000, -2.77px 1.15px 0 #000, -3px 0 0 #000, -2.77px -1.15px 0 #000, -2.12px -2.12px 0 #000, -1.15px -2.77px 0 #000, 0 -3px 0 #000, 1.15px -2.77px 0 #000, 2.12px -2.12px 0 #000, 2.77px -1.15px 0 #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.CardFont {
+    position: absolute;
+    top: 365px;
+    left: 30px;
+    width: 310px;
+    height: 130px;
+    font-size: 17px;
+    letter-spacing: 0.2em;
+    font-weight: bold;
+    color: #FFF;
+    line-height: 1.5em;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+.CardFont2 {
+    position: absolute;
+    top: 502px;
+    left: 93px;
+    width: 232px;
+    height: 13px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    font-weight: bold;
+    color: #FFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.CardFont2:last-child {
+    left: auto;
+    right: 30px;
+    text-align: right;
+}
+.CardStar {
+    position: absolute;
+    bottom: 30px;
+    right: 25px;
+}
+.CardFont::after {
+    content: "星引擎Wiki";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ---- 编辑区样式 ---- */
+.edit-section {
+    width: 400px;
+    background: #3a3a3a;
+    padding: 20px;
+    border-radius: 12px;
+    color: #fff;
+    font-family: '荆南波波黑', sans-serif;
+}
+.edit-section h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #555;
+    padding-bottom: 8px;
+    font-size: 18px;
+}
+.control-group {
+    margin-bottom: 20px;
+}
+.control-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #ccc;
+    font-size: 14px;
+}
+.control-item {
+    margin-bottom: 16px;
+}
+.control-item label {
+    display: block;
+    margin-bottom: 4px;
+    color: #ccc;
+    font-size: 14px;
+}
+.btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 0;
+}
+.btn.secondary {
+    background: #666;
+}
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.text-input, .textarea-input {
+    background: #222;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    min-height: 20px;
+    outline: none;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+.textarea-input {
+    min-height: 60px;
+}
+.number-input {
+    background: #222;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    width: 80px;
+}
+select, input[type="text"] {
+    background: #222;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.hidden {
+    display: none;
+}
+</style>
+</head>
+<body>
+<!-- ===== Widget:CardDiyTool  ===== -->
+<div style="background: #454141; border-radius: 20px; padding: 30px; display: block; width: fit-content; margin: 0 auto; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+    <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
+        
+        <!-- 预览卡片区 -->
+        <div class="hand-card Card" id="character-card-preview" style="font-family:'荆南波波黑'; ">
+            <img src="https://patchwiki.biligame.com/images/starengine/8/88/r4ucxyldzbh5w8m2lmtal1zf5qgnp3n.png" width="362" height="530" style="display: block;">
+            <img class="CardStar" src="https://patchwiki.biligame.com/images/starengine/6/6c/29ghqdw72g3zo7o190no2ye9si4mp56.png" width="32" height="32">
+            <div class="Card0" id="card-art-container" style="background-image: url('https://patchwiki.biligame.com/images/starengine/4/4b/0zckhmjtnnjk6zdp8vjuq2uzs2aiska.png'); background-size: cover; background-position: center; background-repeat: no-repeat; width: 320px; height: 320px; z-index: 1; border-radius: 15px; left: 21px; top: 18px;"></div>
+            <div class="Card00-box-box" id="cost-icon-container" style="z-index: 3;"></div>
+            <img class="Card0" id="type-icon-img" src="https://patchwiki.biligame.com/images/starengine/c/cf/6z6hm9wnd9gv9oh1wi6kvg86cn70rsj.png" width="56" height="56" style="left: 17px; z-index: 4;">
+            <img class="Card1" id="type-bar-img" src="https://patchwiki.biligame.com/images/starengine/f/f4/2hyy1tf8wskoyo4vx29ma5tbi9xfh16.png" width="222" height="55" style="z-index: 3;">
+            <div class="Card1Font" id="card-name-display" style="z-index: 4;">攻击(中)</div>
+            <div class="CardFont" id="card-desc-display" style="z-index: 4;">战斗中攻击方可用<br>攻击力+1~3</div>
+            <div class="CardFont2" id="appendix1-display" style="z-index: 4;">CARD-001</div>
+            <div class="CardFont2" id="appendix2-display" style="justify-items: end; z-index: 4;">一切的恐惧源于火力不足</div>
+        </div>
+
+        <!-- 编辑区 -->
+        <div class="edit-section">
+            <h3>⚙️ 编辑卡牌</h3>
+            <div class="control-group">
+                <label>卡图上传</label>
+                <button class="btn" id="upload-avatar-btn">选择图片</button>
+                <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
+                <p style="font-size:12px; color:#aaa;">上传后可使用鼠标滚轮缩放，左键拖拽调整位置</p>
+            </div>
+            <div class="control-item">
+                <label>卡牌类型</label>
+                <select id="card-type-select">
+                    <option value="Attack" selected>攻击卡</option>
+                    <option value="Defend">防御卡</option>
+                    <option value="Effect">效果卡</option>
+                    <option value="Counter">反制卡</option>
+                    <option value="ji">好运卡</option>
+                    <option value="xiong">霉运卡</option>
+                    <option value="curse">诅咒卡</option>
+                    <option value="Event">事件卡</option>
+                </select>
+            </div>
+            <div class="control-item" id="cost-control">
+                <label>费用 (1-5)</label>
+                <input type="number" class="number-input" id="cost-input" min="1" max="5" value="2">
+            </div>
+            <div class="control-item hidden" id="effect-target-control">
+                <label>效果对象</label>
+                <select id="effect-target-select">
+                    <option value="none">none</option>
+                    <option value="entity">entity</option>
+                    <option value="land">land</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>牌名</label>
+                <div class="text-input" contenteditable="true" id="input-card-name">攻击(中)</div>
+            </div>
+            <div class="control-group">
+                <label>内容描述</label>
+                <div class="textarea-input" contenteditable="true" id="input-card-desc">战斗中攻击方可用<br>攻击力+1~3</div>
+            </div>
+            <div class="control-group">
+                <label>附录1</label>
+                <div class="text-input" contenteditable="true" id="input-appendix1">CARD-001</div>
+            </div>
+            <div class="control-group">
+                <label>附录2</label>
+                <div class="text-input" contenteditable="true" id="input-appendix2">一切的恐惧源于火力不足</div>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <button class="btn" id="save-img-btn">保存图片</button>
+                <button class="btn secondary" id="reset-btn">重置默认</button>
+                <button class="btn" id="export-json-btn" style="background: #2196F3;">导出数据</button>
+                <button class="btn" id="import-json-btn" style="background: #FF9800;">导入数据</button>
+            </div>
+            <input type="file" id="import-file-input" accept=".json" style="display:none;">
+        </div>
+    </div>
+</div>
+   
+<script src="/js/nav.js"></script>
+<!-- 引入 modern-screenshot 最新版 -->
+<script src="https://unpkg.com/modern-screenshot@4.4.39/dist/index.js"></script>
+
+<script>
+(function() {
+    // ---------- 图片链接映射 ----------
+    const IMAGES = {
+        cardStar: 'https://patchwiki.biligame.com/images/starengine/6/6c/29ghqdw72g3zo7o190no2ye9si4mp56.png',
+        cardFront: 'https://patchwiki.biligame.com/images/starengine/8/88/r4ucxyldzbh5w8m2lmtal1zf5qgnp3n.png',
+        defaultCardArt: 'https://patchwiki.biligame.com/images/starengine/4/4b/0zckhmjtnnjk6zdp8vjuq2uzs2aiska.png',
+        card0: {
+            Attack: 'https://patchwiki.biligame.com/images/starengine/c/cf/6z6hm9wnd9gv9oh1wi6kvg86cn70rsj.png',
+            Defend: 'https://patchwiki.biligame.com/images/starengine/5/5f/p7gbou225vr7c23nd4kdznnax0gauf5.png',
+            Effect: 'https://patchwiki.biligame.com/images/starengine/6/6b/hlhdgyb94br5w2kx31rd4y0f2bwms8c.png',
+            Counter: 'https://patchwiki.biligame.com/images/starengine/0/0d/m50515zfmfrql4k8w70tii59fs0xw2c.png',
+            ji: 'https://patchwiki.biligame.com/images/starengine/b/b6/ddmuj8yg220wzuzgjyg1lec4bubeglc.png',
+            xiong: 'https://patchwiki.biligame.com/images/starengine/f/f9/gm8m8vxj0mu09hlo8lxrjt9rfu82omr.png',
+            Event: 'https://patchwiki.biligame.com/images/starengine/7/72/elt3iw99npzgqj2x0tob91oqmthtacg.png',
+            curse: 'https://patchwiki.biligame.com/images/starengine/c/c9/culyn36zhlffrz0vcvb1ou0u79lvdet.png'
+        },
+        card1: {
+            Attack: 'https://patchwiki.biligame.com/images/starengine/f/f4/2hyy1tf8wskoyo4vx29ma5tbi9xfh16.png',
+            Defend: 'https://patchwiki.biligame.com/images/starengine/4/4c/chz02hhjpovsafo9vdnca3044e18y9x.png',
+            Effect: 'https://patchwiki.biligame.com/images/starengine/4/47/qhwd14jh6h83r8ialni9awehjijbp2k.png',
+            Counter: 'https://patchwiki.biligame.com/images/starengine/5/51/a56mimlli62hhseglbvr351h66b8xlw.png',
+            ji: 'https://patchwiki.biligame.com/images/starengine/9/97/g2qpaapjcihm50ay74m0sncdk0vqj7a.png',
+            xiong: 'https://patchwiki.biligame.com/images/starengine/e/ec/kwmpzn3v9ldm9wzbhzpm5ex1bzbcwn0.png',
+            Event: 'https://patchwiki.biligame.com/images/starengine/9/9c/971fj2w3u0o7wli4gl9gt7brv6uggmf.png',
+            curse: 'https://patchwiki.biligame.com/images/starengine/d/d8/a76hpzlhoaievhotci4wqy59y5zs4al.png'
+        },
+        card00: {
+            box: 'https://patchwiki.biligame.com/images/starengine/8/85/qtmwtg4refebe86hyupi6v42g4rjh0u.png',
+            Attack: 'https://patchwiki.biligame.com/images/starengine/3/36/03p7vlcw5p4duzh9d9wm47e4uj38qr1.png',
+            Defend: 'https://patchwiki.biligame.com/images/starengine/0/00/nw7vrqhk8asiu80qfu1z3ls91sxw46u.png',
+            Effect: {
+                none: 'https://patchwiki.biligame.com/images/starengine/1/17/lnzp5bf0n8u4lpnwd28539jcy011421.png',
+                entity: 'https://patchwiki.biligame.com/images/starengine/d/de/0rbvqmjs631xdefu4s5nlw1z70gawrw.png',
+                land: 'https://patchwiki.biligame.com/images/starengine/9/9e/cxzvr6zehvrg0d0cmnohamyz47kf2kk.png'
+            }
+        }
+    };
+
+    // ---------- DOM 元素 ----------
+    const cardArt = document.getElementById('card-art-container');
+    const costContainer = document.getElementById('cost-icon-container');
+    const typeIconImg = document.getElementById('type-icon-img');
+    const typeBarImg = document.getElementById('type-bar-img');
+    const cardNameDisplay = document.getElementById('card-name-display');
+    const cardDescDisplay = document.getElementById('card-desc-display');
+    const appendix1Display = document.getElementById('appendix1-display');
+    const appendix2Display = document.getElementById('appendix2-display');
+
+    const typeSelect = document.getElementById('card-type-select');
+    const costControl = document.getElementById('cost-control');
+    const costInput = document.getElementById('cost-input');
+    const effectControl = document.getElementById('effect-target-control');
+    const effectSelect = document.getElementById('effect-target-select');
+    const inputCardName = document.getElementById('input-card-name');
+    const inputCardDesc = document.getElementById('input-card-desc');
+    const inputAppendix1 = document.getElementById('input-appendix1');
+    const inputAppendix2 = document.getElementById('input-appendix2');
+    const uploadBtn = document.getElementById('upload-avatar-btn');
+    const fileInput = document.getElementById('avatar-file-input');
+    const resetBtn = document.getElementById('reset-btn');
+    const saveBtn = document.getElementById('save-img-btn');
+
+    // 图片拖拽缩放状态
+    let scale = 1;
+    let posX = 50;
+    let posY = 50;
+    let isDragging = false;
+    let startX, startY, startPosX, startPosY;
+
+    // ---------- localStorage 键名 ----------
+    const STORAGE_KEY = 'CardDiyTool_data';
+
+    // ----------收集当前卡牌数据（不含图片）----------
+    function getCardData() {
+        return {
+            version: 1,
+            type: typeSelect.value,
+            cost: parseInt(costInput.value, 10) || 1,
+            effectTarget: effectSelect.value,
+            cardName: inputCardName.innerText.trim(),
+            cardDesc: inputCardDesc.innerHTML.trim(),
+            appendix1: inputAppendix1.innerText.trim(),
+            appendix2: inputAppendix2.innerText.trim(),
+            transform: {
+                scale: scale,
+                posX: posX,
+                posY: posY
+            }
+        };
+    }
+
+    // ---------- 保存当前状态到 localStorage ----------
+    function saveToLocalStorage() {
+        const data = {
+            type: typeSelect.value,
+            cost: costInput.value,
+            effectTarget: effectSelect.value,
+            cardName: inputCardName.innerText,
+            cardDesc: inputCardDesc.innerHTML,
+            appendix1: inputAppendix1.innerText,
+            appendix2: inputAppendix2.innerText,
+            cardArtUrl: cardArt.style.backgroundImage !== 'none' ? cardArt.style.backgroundImage : '',
+            scale: scale,
+            posX: posX,
+            posY: posY
+        };
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            console.warn('保存到 localStorage 失败', e);
+        }
+    }
+
+    // ---------- 从 localStorage 加载状态 ----------
+    function loadFromLocalStorage() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return false;
+        try {
+            const data = JSON.parse(saved);
+            typeSelect.value = data.type || 'Attack';
+            costInput.value = data.cost || 2;
+            effectSelect.value = data.effectTarget || 'none';
+            inputCardName.innerText = data.cardName || '攻击(中)';
+            inputCardDesc.innerHTML = data.cardDesc || '战斗中攻击方可用<br>攻击力+1~3';
+            inputAppendix1.innerText = data.appendix1 || 'CARD-001';
+            inputAppendix2.innerText = data.appendix2 || '一切的恐惧源于火力不足';
+            if (data.cardArtUrl && data.cardArtUrl !== 'none') {
+                cardArt.style.backgroundImage = data.cardArtUrl;
+            } else {
+                cardArt.style.backgroundImage = `url('${IMAGES.defaultCardArt}')`;
+            }
+            scale = data.scale !== undefined ? data.scale : 1;
+            posX = data.posX !== undefined ? data.posX : 50;
+            posY = data.posY !== undefined ? data.posY : 50;
+            cardArt.style.backgroundSize = `${scale * 100}%`;
+            cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
+            toggleControlsByType();
+            updateTypeVisuals();
+            updateCostIcons();
+            updateTexts();
+            return true;
+        } catch (e) {
+            console.warn('读取 localStorage 失败', e);
+            return false;
+        }
+    }
+
+    // ---------- 重置所有数据 ----------
+    function resetToDefault() {
+        localStorage.removeItem(STORAGE_KEY);
+        typeSelect.value = 'Attack';
+        costInput.value = 2;
+        effectSelect.value = 'none';
+        inputCardName.innerText = '攻击(中)';
+        inputCardDesc.innerHTML = '战斗中攻击方可用<br>攻击力+1~3';
+        inputAppendix1.innerText = 'CARD-001';
+        inputAppendix2.innerText = '一切的恐惧源于火力不足';
+        cardArt.style.backgroundImage = `url('${IMAGES.defaultCardArt}')`;
+        cardArt.style.backgroundColor = 'transparent';
+        scale = 1;
+        posX = 50;
+        posY = 50;
+        cardArt.style.backgroundSize = 'cover';
+        cardArt.style.backgroundPosition = 'center';
+        toggleControlsByType();
+        updateTypeVisuals();
+        updateCostIcons();
+        updateTexts();
+        saveToLocalStorage();
+    }
+
+    // ---------- 辅助函数：更新费用/效果图标 ----------
+    function updateCostIcons() {
+        const type = typeSelect.value;
+        const cost = parseInt(costInput.value, 10) || 1;
+        const target = effectSelect.value;
+        let html = '';
+
+        if (type === 'Attack' || type === 'Defend') {
+            const iconType = type === 'Attack' ? 'Attack' : 'Defend';
+            for (let i = 0; i < cost; i++) {
+                html += `
+                    <div class="Card00-box">
+                        <img src="${IMAGES.card00.box}" width="32" height="32">
+                        <div class="Card00">
+                            <img src="${IMAGES.card00[iconType]}" width="20" height="20">
+                        </div>
+                    </div>
+                `;
+            }
+        } else if (type === 'Effect') {
+            const effectImg = IMAGES.card00.Effect[target] || IMAGES.card00.Effect.none;
+            html = `
+                <div class="Card00-box">
+                    <img src="${effectImg}" style="width: 40px; height: auto;">
+                </div>
+            `;
+        }
+        costContainer.innerHTML = html;
+        saveToLocalStorage();
+    }
+
+    function updateTypeVisuals() {
+        const type = typeSelect.value;
+        typeIconImg.src = IMAGES.card0[type] || IMAGES.card0.Attack;
+        typeBarImg.src = IMAGES.card1[type] || IMAGES.card1.Attack;
+        if (type === 'Effect') {
+            costContainer.classList.add('effect');
+        } else {
+            costContainer.classList.remove('effect');
+        }
+        saveToLocalStorage();
+    }
+
+    function updateTexts() {
+        cardNameDisplay.innerText = inputCardName.innerText.trim() || '';
+        cardDescDisplay.innerHTML = inputCardDesc.innerHTML.trim() || '';
+        appendix1Display.innerText = inputAppendix1.innerText.trim() || '';
+        appendix2Display.innerText = inputAppendix2.innerText.trim() || '';
+        saveToLocalStorage();
+    }
+
+    function toggleControlsByType() {
+        const type = typeSelect.value;
+        if (type === 'Attack' || type === 'Defend') {
+            costControl.classList.remove('hidden');
+            effectControl.classList.add('hidden');
+        } else if (type === 'Effect') {
+            costControl.classList.add('hidden');
+            effectControl.classList.remove('hidden');
+        } else {
+            costControl.classList.add('hidden');
+            effectControl.classList.add('hidden');
+        }
+        saveToLocalStorage();
+    }
+
+    // ---------- 图片上传及缩放拖拽功能 ----------
+    function initImageControls() {
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    cardArt.style.backgroundImage = `url('${event.target.result}')`;
+                    cardArt.style.backgroundColor = 'transparent';
+                    // 检查是否有导入流程传来的变换参数
+                    if (window._pendingTransform) {
+                        scale = window._pendingTransform.scale ?? 1;
+                        posX = window._pendingTransform.posX ?? 50;
+                        posY = window._pendingTransform.posY ?? 50;
+                        cardArt.style.backgroundSize = `${scale * 100}%`;
+                        cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
+                        delete window._pendingTransform; // 用完清除
+                    } else {
+                        // 正常手动上传：恢复默认缩放位置
+                        scale = 1;
+                        posX = 50;
+                        posY = 50;
+                        cardArt.style.backgroundSize = 'cover';
+                        cardArt.style.backgroundPosition = 'center';
+                    }
+                    saveToLocalStorage();
+                };
+                reader.readAsDataURL(file);
+            }
+            fileInput.value = '';
+        });
+
+        cardArt.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (!cardArt.style.backgroundImage || cardArt.style.backgroundImage === 'none') return;
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            scale = Math.min(3, Math.max(0.5, scale + delta));
+            cardArt.style.backgroundSize = `${scale * 100}%`;
+            saveToLocalStorage();
+        });
+
+        cardArt.addEventListener('mousedown', (e) => {
+            if (!cardArt.style.backgroundImage || cardArt.style.backgroundImage === 'none') return;
+            e.preventDefault();
+            isDragging = true;
+            cardArt.classList.add('dragging');
+            startX = e.clientX;
+            startY = e.clientY;
+            const pos = window.getComputedStyle(cardArt).backgroundPosition.split(' ');
+            startPosX = parseFloat(pos[0]) || 50;
+            startPosY = parseFloat(pos[1]) || 50;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const rect = cardArt.getBoundingClientRect();
+            const moveX = (dx / rect.width) * 100;
+            const moveY = (dy / rect.height) * 100;
+            posX = Math.min(100, Math.max(0, startPosX - moveX));
+            posY = Math.min(100, Math.max(0, startPosY - moveY));
+            cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
+            saveToLocalStorage();
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                cardArt.classList.remove('dragging');
+            }
+        });
+    }
+
+    // ==================== 使用 FontFace API 手动预加载所有字体分片 ====================
+    let fontLoadPromise = null;
+
+    async function loadAndRegisterFonts() {
+        if (fontLoadPromise) return fontLoadPromise;
+
+        fontLoadPromise = (async () => {
+            try {
+                // 1. 获取字体分片 URL 列表
+                const cssUrl = 'https://fontsapi.zeoseven.com/298/main/result.css';
+                const response = await fetch(cssUrl);
+                const cssText = await response.text();
+                const regex = /url\(['"]?(\.\/[^'"\)]+\.woff2)['"]?\)/g;
+                let match;
+                const baseUrl = 'https://fontsapi.zeoseven.com/298/main/';
+                const fontUrls = [];
+                while ((match = regex.exec(cssText)) !== null) {
+                    const relativePath = match[1];
+                    const fullUrl = baseUrl + relativePath.slice(2);
+                    fontUrls.push(fullUrl);
+                }
+                const uniqueFontUrls = [...new Set(fontUrls)];
+                console.log(`📦 发现 ${uniqueFontUrls.length} 个字体分片，开始加载...`);
+
+                // 2. 使用 FontFace 逐个加载并注册
+                const loadPromises = uniqueFontUrls.map(url => {
+                    return new Promise((resolve) => {
+                        const font = new FontFace('荆南波波黑', `url(${url})`, {
+                            weight: '700',
+                            style: 'normal'
+                        });
+                        font.load().then(loadedFont => {
+                            document.fonts.add(loadedFont);
+                            console.log(`✅ 字体加载成功: ${url.split('/').pop()}`);
+                            resolve(true);
+                        }).catch(err => {
+                            console.warn(`⚠️ 字体加载失败: ${url}`, err);
+                            resolve(false);
+                        });
+                    });
+                });
+
+                await Promise.all(loadPromises);
+                console.log(`🎉 所有字体分片处理完成，共注册 ${uniqueFontUrls.length} 个`);
+                await document.fonts.ready;
+
+                // ========== 测试打印 ==========
+                console.log('字体状态:', document.fonts.check('12px "荆南波波黑"') ? '✅ 可用' : '❌ 不可用');
+                
+            } catch (err) {
+                console.error('❌ 字体预加载失败:', err);
+            }
+        })();
+
+        return fontLoadPromise;
+    }
+
+    // 立即开始预加载
+    loadAndRegisterFonts();
+
+    // ---------- 截图功能（使用 modern-screenshot）----------
+    function setupScreenshot() {
+        if (!saveBtn) return;
+        const cardPreview = document.getElementById('character-card-preview');
+        if (!cardPreview) return;
+
+        // ---------- 提取导出 JSON 功能 ----------
+        function triggerJsonDownload() {
+            const data = getCardData();
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const fileName = `${data.cardName || '卡牌'}.json`;
+            a.download = fileName;
+            a.href = url;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        saveBtn.addEventListener('click', async function() {
+            // --- 弹窗询问是否同时导出数据 ---
+            const shouldExportData = confirm('是否导出数据？');
+            if (shouldExportData) {
+                triggerJsonDownload();   // 先下载 JSON
+            }
+            // 无论是否导出数据，都会继续保存图片
+            const currentBtn = this;
+            const type = typeSelect.value;
+            let cardName = (inputCardName.innerText || '').trim();
+            if (!cardName) cardName = '未命名';
+            cardName = cardName.replace(/[\\/:*?"<>|\r\n]/g, '_');
+            const typeMap = {
+                Attack: '攻击卡',
+                Defend: '防御卡',
+                Effect: '效果卡',
+                Counter: '反制卡',
+                ji: '好运卡',
+                xiong: '霉运卡',
+                Event: '事件卡',
+                curse: '诅咒卡'
+            };
+            const typeDisplay = typeMap[type] || type;
+            const fileName = `卡片_${typeDisplay}_${cardName}`;
+
+            currentBtn.innerText = "生成中...";
+            currentBtn.disabled = true;
+
+            // 等待所有图片加载完成
+            const images = cardPreview.getElementsByTagName('img');
+            const imagePromises = Array.from(images).map(img => {
+                if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+                return new Promise((resolve) => {
+                    img.onload = resolve;
+                    img.onerror = () => {
+                        console.warn('图片加载失败，继续截图:', img.src);
+                        resolve();
+                    };
+                });
+            });
+
+            // 等待背景图加载
+            let bgPromise = Promise.resolve();
+            if (cardArt.style.backgroundImage && cardArt.style.backgroundImage !== 'none') {
+                const bgUrl = cardArt.style.backgroundImage.slice(5, -2);
+                if (bgUrl) {
+                    bgPromise = new Promise((resolve) => {
+                        const bgImg = new Image();
+                        bgImg.onload = resolve;
+                        bgImg.onerror = resolve;
+                        bgImg.src = bgUrl;
+                    });
+                }
+            }
+
+            try {
+                await Promise.all([...imagePromises, bgPromise]);
+                await loadAndRegisterFonts();
+                await document.fonts.ready;
+                cardPreview.offsetHeight;
+
+                if (typeof window.modernScreenshot === 'undefined') {
+                    throw new Error('modern-screenshot 库未加载，请检查网络或刷新页面重试');
+                }
+
+                const dpr = window.devicePixelRatio || 1;
+                const optimalScale = Math.min(4, Math.max(2, dpr * 1.5));
+
+                // 固定卡片尺寸，防止截图裁剪
+                const width = 362;
+                const height = 530;
+
+                const dataUrl = await window.modernScreenshot.domToPng(cardPreview, {
+                    scale: optimalScale,
+                    backgroundColor: null,
+                    width: width,
+                    height: height,
+                    style: {
+                        overflow: 'visible'   // 确保内容不被裁剪
+                    }
+                });
+
+                const link = document.createElement('a');
+                link.download = `${fileName}.png`;
+                link.href = dataUrl;
+                link.click();
+
+            } catch (err) {
+                console.error('截图失败:', err);
+                alert('截图失败：' + err.message);
+            } finally {
+                currentBtn.innerText = "保存图片";
+                currentBtn.disabled = false;
+            }
+        });
+    }
+
+    // ---------- 事件绑定 ----------
+    typeSelect.addEventListener('change', () => {
+        toggleControlsByType();
+        updateTypeVisuals();
+        updateCostIcons();
+    });
+    costInput.addEventListener('input', () => {
+        let val = parseInt(costInput.value, 10);
+        if (isNaN(val) || val < 1) costInput.value = 1;
+        else if (val > 5) costInput.value = 5;
+        updateCostIcons();
+    });
+    effectSelect.addEventListener('change', updateCostIcons);
+    inputCardName.addEventListener('input', updateTexts);
+    inputCardDesc.addEventListener('input', updateTexts);
+    inputAppendix1.addEventListener('input', updateTexts);
+    inputAppendix2.addEventListener('input', updateTexts);
+    resetBtn.addEventListener('click', resetToDefault);
+
+    // 初始化：加载本地存储或保存默认
+    if (!loadFromLocalStorage()) {
+        saveToLocalStorage();
+    } else {
+        cardArt.style.backgroundSize = `${scale * 100}%`;
+        cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
+    }
+
+    initImageControls();
+    setupScreenshot();
+
+    // ---------- 导出 / 导入 ----------
+    const exportJsonBtn = document.getElementById('export-json-btn');
+    const importJsonBtn = document.getElementById('import-json-btn');
+
+    // 导出功能
+    exportJsonBtn.addEventListener('click', () => {
+        const data = getCardData();
+        const jsonStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const fileName = `${data.cardName || '卡牌'}.json`;
+        a.download = fileName;
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // 导入功能
+    const importFileInput = document.getElementById('import-file-input');
+    const importImageFileInput = document.getElementById('import-image-file-input');
+
+    // 导入按钮点击 -> 打开文件选择
+    importJsonBtn.addEventListener('click', () => {
+        importFileInput.click();
+    });
+
+    // 文件选择后读取并校验 JSON
+    importFileInput.addEventListener('change', () => {
+    const file = importFileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        // ---------- 1. 解析与校验 ----------
+        let data;
+        try {
+            data = JSON.parse(e.target.result);
+            if (!data.type || data.cardName === undefined) {
+                throw new Error('缺少必要字段（type 或 cardName）');
+            }
+        } catch (err) {
+            alert('导入失败：' + err.message);
+            importFileInput.value = '';
+            return;
+        }
+
+        // ---------- 2. 应用数据（不改变当前卡图） ----------
+        function applyCardData(parsedData) {
+            typeSelect.value = parsedData.type || 'Attack';
+            costInput.value = parsedData.cost || 2;
+            effectSelect.value = parsedData.effectTarget || 'none';
+            inputCardName.innerText = parsedData.cardName || '';
+            inputCardDesc.innerHTML = parsedData.cardDesc || '';
+            inputAppendix1.innerText = parsedData.appendix1 || '';
+            inputAppendix2.innerText = parsedData.appendix2 || '';
+
+            if (parsedData.transform) {
+                scale = parsedData.transform.scale ?? 1;
+                posX = parsedData.transform.posX ?? 50;
+                posY = parsedData.transform.posY ?? 50;
+                cardArt.style.backgroundSize = `${scale * 100}%`;
+                cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
+            }
+
+            toggleControlsByType();
+            updateTypeVisuals();
+            updateCostIcons();
+            updateTexts();
+            saveToLocalStorage();
+        }
+
+        applyCardData(data);
+
+        // ---------- 3. 询问是否更换卡图 ----------
+        const wantChangeImage = confirm('数据已加载。是否需要更换卡图？');
+        if (wantChangeImage) {
+            // 暂存变换数据，让已有上传逻辑完成后应用
+            window._pendingTransform = data.transform || null;
+            // 触发已有的“选择图片”按钮对应的 file input
+            const avatarInput = document.getElementById('avatar-file-input');
+            if (avatarInput) {
+                avatarInput.click();
+            }
+        }
+
+        importFileInput.value = '';
+    };
+    reader.readAsText(file);
+});
+})();
+</script>
+<script src="/js/nav.js"></script>
+</body></html>

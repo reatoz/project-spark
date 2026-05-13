@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>留言板</title>
+  <link rel="stylesheet" href="/common.css">
+  <link rel="stylesheet" href="https://waline.8765876.xyz/comment-widget.css">
+  <style>
+    .messages-container {
+      flex: 1;
+      width: 100%;
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 20px;
+    }
+    .messages-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      color: #fff;
+    }
+    .messages-card h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-weight: 400;
+    }
+    .comment-widget {
+      color: #e0e0e0;
+    }
+    .cw-btn {
+      background: #667eea !important;
+    }
+  </style>
+</head>
+<body>
+  <main class="messages-container">
+    <div class="messages-card">
+      <h2>📬 留言板</h2>
+      <div id="comment-widget"></div>
+    </div>
+  </main>
+
+  <script src="https://waline.8765876.xyz/comment-widget.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.CommentWidget && typeof window.CommentWidget.init === 'function') {
+        window.CommentWidget.init({
+          el: '#comment-widget',
+          serverURL: 'https://waline.8765876.xyz'
+        });
+      } else {
+        console.error('CommentWidget 未加载');
+      }
+    });
+  </script>
+</body>
+</html>

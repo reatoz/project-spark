@@ -1,0 +1,2584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星趴角色模拟器</title>
+  <link rel="stylesheet" href="/common.css">
+  <style>
+    /* ===== 引入外部字体 ===== */
+    @import url("https://fontsapi.zeoseven.com/298/main/result.css");
+    @import url("https://db.onlinewebfonts.com/c/d66fa62dabed66f2226a1b2d17da0579?family=Showcard+Gothic");
+    @import url("https://db.onlinewebfonts.com/c/771d2d395300ea1b80c34ba5282bf694?family=Impact");
+  
+    /* 整体容器：16:9比例，居中 */
+    #character-diy-container {
+      font-family: "荆南波波黑", "Showcard Gothic", Arial, sans-serif;
+      font-size: 20px;
+      aspect-ratio: 16 / 9;
+      width: 1000px;
+      margin: 0 auto;
+      color: #fff;
+    }
+  
+    /* 黑色描边通用样式（用于称号、名字等） */
+    .left-name1, 
+    .left-name2, 
+    .intimacy-value, 
+    .right-title, 
+    .char-potential, 
+    .char-archive {
+      color: #ffffff !important;
+      text-shadow: 2.6px 0 0 #000, 2.4px 0.99px 0 #000, 1.84px 1.84px 0 #000, 
+                    0.99px 2.4px 0 #000, 0 2.6px 0 #000, -0.99px 2.4px 0 #000, 
+                    -1.84px 1.84px 0 #000, -2.4px 0.99px 0 #000, -2.6px 0 0 #000, 
+                    -2.4px -0.99px 0 #000, -1.84px -1.84px 0 #000, -0.99px -2.4px 0 #000, 
+                    0 -2.6px 0 #000, 0.99px -2.4px 0 #000, 1.84px -1.84px 0 #000, 
+                    2.4px -0.99px 0 #000;
+    }
+  
+    .tag-text, 
+    .function-tags span {
+      color: #ffffff !important;
+      text-shadow: 3px 0 0 #000, 2.77px 1.15px 0 #000, 2.12px 2.12px 0 #000, 
+                    1.15px 2.77px 0 #000, 0 3px 0 #000, -1.15px 2.77px 0 #000, 
+                    -2.12px 2.12px 0 #000, -2.77px 1.15px 0 #000, -3px 0 0 #000, 
+                    -2.77px -1.15px 0 #000, -2.12px -2.12px 0 #000, -1.15px -2.77px 0 #000, 
+                    0 -3px 0 #000, 1.15px -2.77px 0 #000, 2.12px -2.12px 0 #000, 
+                    2.77px -1.15px 0 #000;
+    }
+  
+    .preview-section {
+      margin-bottom: 30px;
+    }
+  
+    /* 角色卡片主容器：多层背景叠加 */
+    .character-card {
+      position: relative;
+      width: 100%;
+      min-height: 600px;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      background-image: 
+        url('https://patchwiki.biligame.com/images/starengine/6/64/nwv2wf3eusmxsm274yo1tl4bj0hjzco.png'),
+        url('https://patchwiki.biligame.com/images/starengine/5/57/nfdf4valfnmo6cykwhgxswkgpg0nbcb.png'),
+        url('https://patchwiki.biligame.com/images/starengine/7/7d/6w02movplttlhg7bo3ou2zx40gsn3gj.png'),
+        url('https://patchwiki.biligame.com/images/starengine/3/39/ficce0in6gt1xf8yyb15q0n9y93yua5.png');
+      background-position:
+        left center,   /* 左侧图案 */
+        left top,      /* 左侧装饰 */
+        left top,     /* 白色斜线平铺 */
+        center;        /* 背景图居中 */
+      background-size:
+        auto 75.5%,
+        45% 100%,
+        64px  64px,
+        cover;
+      background-repeat:
+        no-repeat,
+        no-repeat,
+        repeat,
+        no-repeat;
+      background-color: transparent;
+    }
+  
+    /* 左上角返回按钮 */
+    .return-text {
+      position: absolute;
+      top: -24px;
+      left: 14px;
+      width: 120px;
+      height: 120px;
+      z-index: 10;
+    }
+    
+    .return-text img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: block;
+      pointer-events: none;
+    }
+    
+    .arrow-white { width: 100px; z-index: 1; }
+    .arrow-blue, .arrow-green { width: 90px; z-index: 2; transition: opacity 0.2s ease; }
+    .arrow-blue { opacity: 1; }
+    .arrow-green { opacity: 0; }
+    
+    .return-text:hover .arrow-blue { opacity: 0; }
+    .return-text:hover .arrow-green { opacity: 1; }
+    
+    .return-text span {
+      position: absolute;
+      top: 48%;
+      left: 58%;
+      transform: translate(-50%, -50%);
+      color: black;
+      font-size: 21px;
+      font-weight: bold;
+      text-shadow: 1.2px 1.2px 0 white, -1.2px -1.2px 0 white, 1.2px -1.2px 0 white, -1.2px 1.2px 0 white;
+      z-index: 3;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+  
+    /* 左侧大立绘容器（支持拖拽缩放） */
+    .left-avatar {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-73%);
+      top: 0;
+      width: 900px;
+      height: 900px;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .left-avatar img {
+      width: 50%;
+      height: auto;
+      object-fit: contain;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: auto;
+      transform-origin: 0 0;
+      transition: transform 0.05s;
+    }
+    
+    .left-avatar img:active {
+      cursor: grabbing;
+    }
+  
+    /* 左侧U形背景块（称号+角色名） */
+    .left-name-block {
+      position: absolute;
+      right: 44.5%;
+      bottom: 152px;
+      padding: 2px 36px 2px 1px;
+      height: 60px;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+    
+    .left-name-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://patchwiki.biligame.com/images/starengine/9/91/h9ym1j27tjtw7soxzxr40qip6eul305.png') no-repeat -40px center / auto 100%;
+      opacity: 0.58;
+      z-index: -1;
+    }
+    
+    .left-name1, .left-name2 {
+      line-height: 28px;
+      margin: 0;
+    }
+    
+    .left-name1 {
+      display: block;
+      font-size: 12px;
+      transform: translateX(-10px);
+    }
+    
+    .left-name2 {
+      display: block;
+      font-size: 22px;
+      transform: translateX(10px);
+      text-align: right;
+      white-space: nowrap;
+    }
+  
+    /* 点击预览按钮 */
+    .clickpreview-text {
+      position: absolute;
+      left: calc(100% - 44.5% - 185px);
+      transform: translateX(-50%);
+      bottom: 215px;
+      z-index: 3;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/8/80/f9cj2ih94leziit15ejf5otqkdy8s2g.png');
+      background-size: 70% 90%;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: inline-block;
+      padding: 8px 1px;
+      min-width: 145px;
+      text-align: center;
+      box-sizing: border-box;
+      color: white;
+      font-size: 20px;
+      line-height: 1.2;
+      white-space: nowrap;
+      text-shadow: 0.5px 0 0 #000, -0.5px 0 0 #000, 0 0.5px 0 #000, 0 -0.5px 0 #000;
+    }
+  
+    /* 亲密度区域 */
+    .intimacy-area {
+      position: absolute;
+      left: 27%;
+      bottom: 116px;
+      width: auto;
+      z-index: 2;
+    }
+    
+    .hearts-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 5px;
+    }
+    
+    .heart-container {
+      position: relative;
+      width: 26px;
+      height: 26px;
+    }
+    
+    .heart-empty, .heart-filled {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .heart-filled {
+      display: none;
+      width: 80%;
+      height: 80%;
+      top: 10%;
+      left: 10%;
+    }
+    
+    .heart-container.filled .heart-filled {
+      display: block;
+    }
+    
+    .intimacy-bar {
+      position: absolute;
+      left: 68px;
+      top: 28px;
+      width: 78px;
+      height: 4px;
+      z-index: 3;
+    }
+    
+    .intimacy-value {
+      position: absolute;
+      left: calc(68px + 63px/2 + 11px);
+      transform: translateX(-50%);
+      top: 32px;
+      font-size: 19px;
+      color: #fff;
+      white-space: nowrap;
+    }
+  
+    /* 左右浮动装饰图标动画 */
+    .float-icon {
+      position: absolute;
+      top: 53%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: auto;
+      z-index: 20;
+      pointer-events: none;
+    }
+    
+    .left-float {
+      left: 10px;
+      animation: float-left 3s ease-in-out infinite;
+    }
+    
+    .right-float {
+      left: calc(42% - 40px);
+      right: auto;
+      transform: translateY(-50%) scaleX(-1);
+      animation: float-right 3s ease-in-out infinite;
+    }
+    
+    @keyframes float-left {
+      0% { transform: translateY(-50%) translateX(0); }
+      50% { transform: translateY(-50%) translateX(-6px); }
+      100% { transform: translateY(-50%) translateX(0); }
+    }
+    
+    @keyframes float-right {
+      0% { transform: translateY(-50%) scaleX(-1) translateX(0); }
+      50% { transform: translateY(-50%) scaleX(-1) translateX(-6px); }
+      100% { transform: translateY(-50%) scaleX(-1) translateX(0); }
+    }
+  
+    /* 水印 */
+    .watermark {
+      position: absolute;
+      top: calc(50% - 60px);
+      right: 43.5%;
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      pointer-events: none;
+      z-index: 999;
+      transform: translateY(-50%) rotate(-90deg);
+    }
+  
+    /* 右侧内容区（灰色圆角背景） */
+    .right-content {
+      position: absolute;
+      right: 0;
+      top: 20px;
+      bottom: 20px;
+      width: 56%;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 5;
+      background-color: #636363;
+      border-radius: 20px 0 0 20px;
+      padding: 0;
+      overflow-y: auto;
+    }
+  
+    .right-name {
+      font-size: 36px;
+      color: #fff;
+      text-shadow: 4px 0 0 #000, 3.7px 1.53px 0 #000, 2.83px 2.83px 0 #000, 
+                    1.53px 3.7px 0 #000, 0 4px 0 #000, -1.53px 3.7px 0 #000, 
+                    -2.83px 2.83px 0 #000, -3.7px 1.53px 0 #000, -4px 0 0 #000, 
+                    -3.7px -1.53px 0 #000, -2.83px -2.83px 0 #000, -1.53px -3.7px 0 #000, 
+                    0 -4px 0 #000, 1.53px -3.7px 0 #000, 2.83px -2.83px 0 #000, 
+                    3.7px -1.53px 0 #000;
+      margin: 4px 0 0 40px;
+      line-height: 1.2;
+    }
+    
+    .right-title {
+      font-size: 20px;
+      color: #a3c4f3;
+      margin: 0 0 0 44px;
+      line-height: 1.2;
+    }
+  
+    /* 四个标签行（技能/升级/潜能/档案） */
+    .tags-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      margin-top: 4px;
+      margin-bottom: 6px;
+      padding-left: 20px;
+    }
+    
+    .tag-icon img {
+      width: 23px;
+      height: auto;
+    }
+    
+    .tag-icon-skill img {
+      width: 36px;
+      height: auto;
+      margin-left: -8px;
+    }
+    
+    .tag-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 4px 16px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.3);
+      flex: 0 0 22.3%;
+      min-width: 0;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+    
+    .tag-text {
+      font-size: 19px;
+      line-height: 1;
+    }
+    
+    .tag-item.skill-tag {
+      justify-content: flex-start;
+      gap: 14px;
+      background: none;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/0/0b/4rocwm64l4rqos2jbaoohbecizhmvjp.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+    .tag-item.upgrade-tag, 
+    .tag-item.potential-tag, 
+    .tag-item.archive-tag {
+      background: none;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/1/1e/b804sx27iubzi7tfbw1gdxuvn0n8ai8.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  
+    /* 标签悬停联动效果 */
+    .tags-row:hover .tag-item {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/1/1e/b804sx27iubzi7tfbw1gdxuvn0n8ai8.png');
+    }
+    
+    .tags-row .tag-item:hover {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/0/0b/4rocwm64l4rqos2jbaoohbecizhmvjp.png');
+    }
+    
+    .tag-item.potential-active,
+    .tag-item.archive-active {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/0/0b/4rocwm64l4rqos2jbaoohbecizhmvjp.png') !important;
+    }
+    
+    .tag-item.force-pink {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/1/1e/b804sx27iubzi7tfbw1gdxuvn0n8ai8.png') !important;
+    }
+  
+    /* 默认面板背景 */
+    .background-wrapper {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/d/d3/d19bzrd4d15nf8mrk7ro8l7kdz2otzh.png');
+      background-size: 100% auto;
+      background-position: top;
+      background-repeat: no-repeat;
+      padding: 15px 0;
+      border-radius: 0;
+    }
+  
+    /* 数值字体 */
+    .stat-value, 
+    .level-number, 
+    .cd-time {
+      font-family: "Showcard Gothic", Arial, sans-serif;
+      text-shadow: 1px 0 0 #000, 0.92px 0.38px 0 #000, 0.71px 0.71px 0 #000, 
+                    0.38px 0.92px 0 #000, 0 1px 0 #000, -0.38px 0.92px 0 #000, 
+                    -0.71px 0.71px 0 #000, -0.92px 0.38px 0 #000, -1px 0 0 #000, 
+                    -0.92px -0.38px 0 #000, -0.71px -0.71px 0 #000, -0.38px -0.92px 0 #000, 
+                    0 -1px 0 #000, 0.38px -0.92px 0 #000, 0.71px -0.71px 0 #000, 
+                    0.92px -0.38px 0 #000;
+    }
+    
+    .stat-value {
+      font-size: 26px;
+    }
+    
+    .level-number {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 28px;
+      z-index: 10;
+      white-space: nowrap;
+    }
+    
+    .cd-time {
+      font-size: 24px;
+    }
+  
+    .stats-row {
+      display: flex;
+      gap: 0 60px;
+      margin: 2px 0 2px 40px;
+      margin-bottom: 5px;
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .stat-icon { font-size: 20px; }
+    .stat-icon img { width: 20px; height: auto; }
+  
+    .challenge-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: transparent;
+      padding: 2px 12px;
+      margin-left: 52px;
+      margin-top: 2px;
+    }
+    
+    .number-with-icon {
+      position: relative;
+      width: 40px;
+      height: 40px;
+    }
+    
+    .level-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .level-icon img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .potential-trigger {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: transparent;
+      padding: 4px 12px;
+      border-radius: 30px;
+    }
+    
+    .challenge-text, .level-text, .potential-text {
+      font-size: 21px;
+    }
+  
+    /* 技能行 */
+    .skill-row.active {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 2px;
+      width: 100%;
+    }
+    
+    .skill-name-bg {
+      background: #1a1a1a;
+      padding: 3px 0 3px 12px;
+      margin-left: 10px;
+      width: 55%;
+      box-sizing: border-box;
+      border-radius: 0;
+      color: #ffbf00;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 16px;
+      font-family: "Microsoft YaHei", "微软雅黑", "Showcard Gothic", Arial, sans-serif;
+      flex-shrink: 0;
+    }
+    
+    .passive .skill-name-bg {
+      color: #98fcfd;
+    }
+    
+    .cd-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-left: 50px;
+    }
+    
+    .cd-icon { font-size: 30px; }
+  
+    /* 技能模式切换（PVE/PVP） */
+    .skill-mode-wrapper {
+      position: absolute;
+      right: 5px;
+      top: 258px;
+      z-index: 10;
+      width: auto;
+      height: auto;
+    }
+    
+    .skill-mode { position: static; }
+    
+    .skill-tabs-list {
+      position: relative;
+      display: flex;
+      background-color: #000;
+      border-radius: 55px;
+      overflow: hidden;
+      width: fit-content;
+      gap: 6px;
+      padding: 0;
+      margin: 0;
+      user-select: none;
+    }
+    
+    .circle {
+      position: relative;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      color: #666666;
+      font-size: 27px;
+      font-weight: bold;
+      z-index: 2;
+      transition: color 0.3s ease;
+      background: transparent;
+      border: none;
+      margin: 0;
+      cursor: pointer;
+    }
+    
+    .circle span {
+      font-family: "Impact", sans-serif;
+      text-shadow: 3px 0 0 #000, 2.77px 1.15px 0 #000, 2.12px 2.12px 0 #000, 
+                    1.15px 2.77px 0 #000, 0 3px 0 #000, -1.15px 2.77px 0 #000, 
+                    -2.12px 2.12px 0 #000, -2.77px 1.15px 0 #000, -3px 0 0 #000, 
+                    -2.77px -1.15px 0 #000, -2.12px -2.12px 0 #000, -1.15px -2.77px 0 #000, 
+                    0 -3px 0 #000, 1.15px -2.77px 0 #000, 2.12px -2.12px 0 #000, 
+                    2.77px -1.15px 0 #000;
+    }
+    
+    .active-indicator {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/1/16/d020si32vciyklpqcvaq2531n122e8m.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: transparent;
+      position: absolute;
+      transition: transform 0.3s ease;
+      z-index: 1;
+      top: 1px;
+      left: 1px;
+      border: none;
+      box-shadow: none;
+      pointer-events: none;
+    }
+    
+    .circle.active { color: #fff; }
+  
+    /* 技能描述 */
+    .skill-desc {
+      background: transparent;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-bottom: 2px;
+      margin-top: -3px;
+      margin-left: 10px;
+      font-size: 14px;
+      white-space: pre-wrap;
+      width: 80%;
+    }
+    
+    #preview-active-desc { margin-top: -5px; }
+  
+    /* 底部功能标签 */
+    .function-tags {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: #1a1a1a;
+      border-bottom-left-radius: 20px;
+      height: 77px;
+      padding: 0 10px;
+      margin-top: auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .function-tags > span {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 46px;
+      box-sizing: border-box;
+      white-space: nowrap;
+      text-align: center;
+      font-size: 23px;
+      color: white;
+      line-height: 48px;
+      border-radius: 20px;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: none;
+      background-color: transparent;
+    }
+    
+    .function-tags .file-tag {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/3/33/l3irzv0rmcw7c5tlsavgo60i3lftmi9.png');
+      background-color: #a2ff17;
+    }
+    
+    .function-tags .contract-tag,
+    .function-tags .skin-tag,
+    .function-tags .expression-tag {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/7/77/kj3g8yb4hspyqweausn1n0cpt28mk4l.png');
+    }
+    
+    .function-tags:hover > span {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/7/77/kj3g8yb4hspyqweausn1n0cpt28mk4l.png') !important;
+      background-color: #000 !important;
+    }
+    
+    .function-tags > span:hover {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/3/33/l3irzv0rmcw7c5tlsavgo60i3lftmi9.png') !important;
+      background-color: #a2ff17 !important;
+    }
+  
+    /* 潜能面板 */
+    .potential-panel {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    
+    .potential-bg {
+      flex: 0 0 61%;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/d/d3/d19bzrd4d15nf8mrk7ro8l7kdz2otzh.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 0;
+      margin: 0;
+    }
+    
+    .potential-no {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 75.5% 24.5%;
+      grid-template-rows: 17% 70% auto;
+      height: 100%;
+    }
+    
+    .potential-no-header {
+      grid-column: 1 / 2;
+      grid-row: 1 / 2;
+      margin-top: 4px;
+      margin-left: 36px;
+      width: 100%;
+      color: #6eff05;
+      text-shadow: 3px 0 0 #000, 2.77px 1.15px 0 #000, 2.12px 2.12px 0 #000, 
+                    1.15px 2.77px 0 #000, 0 3px 0 #000, -1.15px 2.77px 0 #000, 
+                    -2.12px 2.12px 0 #000, -2.77px 1.15px 0 #000, -3px 0 0 #000, 
+                    -2.77px -1.15px 0 #000, -2.12px -2.12px 0 #000, -1.15px -2.77px 0 #000, 
+                    0 -3px 0 #000, 1.15px -2.77px 0 #000, 2.12px -2.12px 0 #000, 
+                    2.77px -1.15px 0 #000;
+    }
+    
+    .potential-no-items {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      margin-top: 12px;
+      box-sizing: border-box;
+      background-color: #292929;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      border-radius: 0 12px 12px 0;
+    }
+    
+    .potential-no-items1 {
+      width: 65px;
+      height: 65px;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/d/da/5q3l7rex6f3snqrotied39nnvo7e52o.png'), 
+                        url('https://patchwiki.biligame.com/images/starengine/0/06/70yjl5wtjohggzfow1ymncwc685iibr.png');
+      background-size: cover, cover;
+      background-position: center, center;
+      background-repeat: no-repeat, no-repeat;
+    }
+    
+    .potential-no-items2 {
+      width: 65px;
+      height: 65px;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/f/fe/0vfbwc0zty8ng946p593md62jestnnt.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+    .potential-no-items2-stuff {
+      position: relative;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .potential-no-items2-stuff img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .items2-stuff-group {
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 11px;
+    }
+    
+    .potential-no-items3 {
+      width: 65px;
+      height: 65px;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/5/58/282l0ethlcwxdocu9t3cavb15fm8wj6.png'), 
+                        url('https://patchwiki.biligame.com/images/starengine/f/fe/0vfbwc0zty8ng946p593md62jestnnt.png');
+      background-size: cover, cover;
+      background-position: center, center;
+      background-repeat: no-repeat, no-repeat;
+    }
+    
+    .potential-no-items1, .potential-no-items3 {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      font-size: 11px;
+    }
+    
+    .potential-no-items1 span, .potential-no-items3 span {
+      position: relative;
+      bottom: -8px;
+    }
+    
+    .potential-no-act {
+      grid-column: 2 / 3;
+      grid-row: 1 / -1;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/1/17/ep64epz5td0gwzw7s61yb61535ezr7q.png');
+      background-size: 80% 80%;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 0;
+      margin: 0;
+    }
+    
+    .potential-light {
+      flex: 1;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/c/c4/07wj64knjgaynzpy7t4ttm9ypo2drm8.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 0;
+      margin: 0;
+    }
+    
+    .char-potential {
+      background: #b863fe;
+      padding: 2px 0 2px 36px;
+      margin-left: 0;
+      margin-top: 8px;
+      width: 73%;
+      box-sizing: border-box;
+      border-radius: 0 15px 15px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    
+    .char-potential span { font-size: 20px; }
+    
+    .char-potential-desc {
+      font-size: 15px;
+      padding: 4px 0 2px 36px;
+      margin-left: 0;
+      box-sizing: border-box;
+      white-space: pre-wrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+  
+    /* 档案面板 */
+    .archive-panel {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    
+    .archive-bg {
+      flex: 0 0 102%;
+      background-image: url('https://patchwiki.biligame.com/images/starengine/d/d3/d19bzrd4d15nf8mrk7ro8l7kdz2otzh.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 0;
+      padding: 0;
+      color: #fff;
+    }
+    
+    .char-archive {
+      background: #ff6900;
+      padding: 2px 0 2px 36px;
+      margin-left: 0;
+      margin-top: 8px;
+      width: 73%;
+      box-sizing: border-box;
+      border-radius: 0 15px 15px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      gap: 145px;
+    }
+    
+    .char-archive-desc-box { margin-left: -28px; }
+    
+    .char-archive-full-name {
+      font-size: 18px;
+      padding: 8px;
+      border-radius: 8px;
+      margin-left: 30px;
+      margin-bottom: 12px;
+      line-height: 1;
+      white-space: pre-wrap;
+    }
+    
+    .archive-detail {
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      margin-left: 52px;
+      margin-top: -16px;
+      line-height: 1.4;
+    }
+    
+    .archive-detail div {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .archive-detail span:first-child {
+      width: auto;
+      font-weight: normal;
+      white-space: normal;
+    }
+  
+    /* ========== 编辑区样式 ========== */
+    .edit-section {
+      background: #ffffff;
+      border-radius: 0;
+      padding: 10px 15px;
+      margin-top: 15px;
+      color: #000000;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      border: 1px solid #ddd;
+    }
+    
+    .edit-section h3 {
+      margin: 0 0 12px 0;
+      color: #000;
+      font-weight: normal;
+      border-bottom: 2px solid #333;
+      padding-bottom: 5px;
+      font-size: 16px;
+    }
+    
+    .control-group {
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .control-group:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    /* 编辑区标签默认最小宽度，保证对齐 */
+    .control-group label {
+      display: inline-block;
+      min-width: 100px;
+      margin-bottom: 0;
+      color: #333;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .text-input, .number-input, .textarea-input {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 0;
+      padding: 6px 10px;
+      color: #000;
+      width: auto;
+      min-width: 50px;   /* 统一数字框最小宽度，避免过宽撑开 */
+      flex: 1 1 auto;
+      box-sizing: border-box;
+      margin-bottom: 0;
+      cursor: text;
+      font-family: inherit;
+      font-size: 13px;
+    }
+    
+    .textarea-input {
+      min-height: 50px;
+      width: 100%;
+      flex-basis: 100%;
+    }
+    
+    .number-input {
+      width: auto;
+      max-width: 40px;
+    }
+    
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      min-width: 140px;
+    }
+    
+    .control-item label {
+      min-width: auto !important;  /* 控件项内的标签不需要强制最小宽度 */
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .control-item .number-input {
+      flex-shrink: 0;
+      width: auto;
+      max-width: 50px;
+      text-align: center;
+    }
+    
+    .control-item .switch-btn {
+      flex-shrink: 0;
+    }
+    
+    .control-item input.number-input {
+      max-width: 50px;
+      padding: 6px 5px;
+      text-align: center;
+    }
+    
+    .switch-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .switch-btn {
+      width: 46px;
+      height: 22px;
+      background: #ccc;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 1px solid #aaa;
+    }
+    
+    .switch-btn::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 1px;
+      left: 2px;
+      transition: 0.2s;
+      border: 1px solid #888;
+    }
+    
+    .switch-btn.active::after {
+      left: 23px;
+    }
+    
+    .btn {
+      background: #f0f0f0;
+      border: 1px solid #aaa;
+      color: #000;
+      padding: 6px 15px;
+      border-radius: 0;
+      font-weight: normal;
+      cursor: pointer;
+      font-size: 13px;
+      margin-right: 8px;
+      transition: 0.1s;
+    }
+    
+    .btn.secondary {
+      background: #f0f0f0;
+      border: 1px solid #aaa;
+      color: #000;
+    }
+    
+    .control-group:last-child .btn {
+      margin-right: 5px;
+    }
+  
+    .top-switches {
+      align-items: flex-start;
+    }
+  </style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.0.2/dist/html2canvas-pro.min.js"></script>
+<div id="character-diy-container">
+  <!--++卡片预览++ -->
+  <div class="preview-section">
+    <!--== 左侧区域 ==-->
+    <div class="character-card" id="character-card-preview">
+      <!--左上角返回按钮-->
+      <div class="return-text">
+        <img src="https://patchwiki.biligame.com/images/starengine/a/a2/dab0cpmjfmrg52zxiy85k9u8ogq39h4.png" alt="白色箭头" class="arrow-white">
+        <img src="https://patchwiki.biligame.com/images/starengine/5/59/57z8o94fihuxcdtxqe8hp810xxxwnmt.png" alt="蓝色箭头" class="arrow-blue">
+        <img src="https://patchwiki.biligame.com/images/starengine/1/15/gocdrkztewy4q2mz4c9as0aqjumkxio.png" alt="绿色箭头" class="arrow-green">
+        <span>返回</span>
+      </div>
+      <!--角色立绘-->
+      <div class="left-avatar">
+        <img id="preview-avatar" src="https://patchwiki.biligame.com/images/starengine/e/e3/sqjeojqr22j322mp104zwhwztfvdrei.png" alt="avatar" draggable="false">
+      </div>
+      <!-- 羁绊/皮肤预览按钮 -->
+      <div class="clickpreview-text" id="preview-clickpreview">
+        <span>点击预览</span>
+      </div>
+      <!-- 左侧U形半透明背景块（称号+角色名） -->
+      <div class="left-name-block">
+        <span class="left-name1" id="preview-left-name1">看板娘</span>
+        <span class="left-name2" id="preview-left-name2">米米</span>
+      </div>
+      <!-- 亲密度区域（红心+细条+数值） -->
+      <div class="intimacy-area">
+        <div class="hearts-row" id="preview-hearts-row">
+          <div class="heart-container">
+            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
+            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
+          </div>
+          <div class="heart-container">
+            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
+            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
+          </div>
+          <div class="heart-container">
+            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
+            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
+          </div>
+          <div class="heart-container">
+            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
+            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
+          </div>
+          <div class="heart-container">
+            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
+            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
+          </div>
+        </div>
+        <div class="intimacy-bar"></div>
+        <div class="intimacy-value" id="preview-intimacy-value">0/20</div>
+      </div>
+      <!-- 左侧区域结束 -->
+
+      <!--== 右侧区域 ==-->
+      <div class="right-content">
+        <!--右侧名字和称号-->
+        <div class="right-name" id="preview-right-name">米米</div>
+        <div class="right-title" id="preview-right-title">看板娘</div>
+        
+        <!--右侧上部分四个功能标签-->
+        <div class="tags-row">
+          <div class="tag-item skill-tag">
+            <span class="tag-icon-skill">
+              <img id="skill-tag-icon" src="https://patchwiki.biligame.com/images/starengine/9/9a/cshh2jxyoo2lmldzobwbf6h3bnm7qb0.png" alt="技能">
+            </span>
+            <span class="tag-text" id="preview-tag-text-skill">技能</span>
+          </div>
+          <div class="tag-item upgrade-tag">
+            <span class="tag-icon">
+              <img src="https://patchwiki.biligame.com/images/starengine/7/7d/o8ntu3zcgioks77g02hkto43iol85mh.png" alt="升级">
+            </span>
+            <span class="tag-text" id="preview-tag-text-upgrade">升级</span>
+          </div>
+          <div class="tag-item potential-tag" id="preview-tag-potential-container">
+            <span class="tag-icon">
+              <img src="https://patchwiki.biligame.com/images/starengine/4/40/9bh39qnoyh2x10debeq0kgp7orwie7y.png" alt="潜能">
+            </span>
+            <span class="tag-text" id="preview-tag-text-potential">潜能</span>
+          </div>
+          <div class="tag-item archive-tag" id="preview-tag-archive-container">
+            <span class="tag-icon">
+              <img src="https://patchwiki.biligame.com/images/starengine/c/c8/ckhsfhqhmw0tmg5ry56b4eclr1t2ojg.png" alt="档案">
+            </span>
+            <span class="tag-text" id="preview-tag-text-archive">档案</span>
+          </div>
+        </div>
+
+        <!--三维&合作挑战等级面板-->
+        <div class="default-panel">
+          <div class="background-wrapper">
+            <div class="stats-row">
+              <div class="stat-item">
+                <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/b/bc/q8dv71j98s29py0869spvugjizh2s5n.png" alt="攻击力"></span>
+                <span class="stat-value" id="preview-stat-value-atk">1</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/c/c7/5fsjolpeteic8g5qndh3cf162ke3mdp.png" alt="防御力"></span>
+                <span class="stat-value" id="preview-stat-value-def">1</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/6/6a/t7i9ykragp8li6t9v2vh37krc9yzfas.png" alt="血量"></span>
+                <span class="stat-value" id="preview-stat-value-hp">9</span>
+              </div>
+            </div>
+            <div class="challenge-row">
+              <span class="challenge-text" id="preview-challenge-text">合作挑战</span>
+              <span class="level-text" id="preview-level-text">等级</span>
+              <div class="number-with-icon">
+                <span class="level-icon"><img src="https://patchwiki.biligame.com/images/starengine/3/33/b23oz95dpmv73l571xvxsrylq5w28g7.png" alt="合作挑战等级"></span>
+                <span class="level-number" id="preview-level-number">6</span>
+              </div>
+              <div class="potential-trigger" id="preview-potential-trigger">
+                <span class="potential-icon"><img src="https://patchwiki.biligame.com/images/starengine/4/40/9bh39qnoyh2x10debeq0kgp7orwie7y.png" alt="潜能激发" style="width:22px; height:auto;"></span>
+                <span class="potential-text" id="preview-potential-text">潜能激发</span>
+              </div>
+            </div>
+          </div>
+          
+          <!--主动技能-->
+          <div class="skill-row active" id="active-skill-row">
+            <div class="skill-name-bg" id="preview-active-skill-name">主动技能：商品补货</div>
+            <div class="cd-item">
+              <span class="cd-icon"><img src="https://patchwiki.biligame.com/images/starengine/archive/5/54/20260325094535%21%E5%86%B7%E5%8D%B4.png" alt="冷却" style="width:26px; height:auto;"></span>
+              <span class="cd-time" id="preview-cd-time">3</span>
+            </div>
+          </div>
+          <div class="skill-desc" id="preview-active-desc">丢弃全部手牌，随后获得原手牌数量{{#ff4646|+1}}张卡牌。</div>
+
+          <!--被动技能-->
+          <div class="skill-row passive">
+            <div class="skill-name-bg" id="preview-passive-skill-name">被动技能：过期回收</div>
+          </div>
+          <div class="skill-desc" id="preview-passive-desc">每丢弃1张战斗牌，获得1星币。</div>
+        </div>
+
+        <!--潜能激发面板-->
+        <div class="potential-panel" style="display: none;">
+          <div class="potential-bg">
+            <div class="char-potential">
+              <span id="char-potential-name">米米</span>
+              <span>－－潜能激发</span>
+            </div>
+            <div class="char-potential-desc">每累计获得25张卡牌，获得1个筹码。</div>
+          </div>
+          <!--潜能激发面板——未激活-->
+          <div class="potential-no">
+            <div class="potential-no-header">需要合作挑战等级6</div>
+            <div class="potential-no-items">
+              <div class="potential-no-items1">
+                <span style="color: #a2ff17;">4</span><span>/1</span>
+              </div>
+              <div class="potential-no-items2">
+                <div class="potential-no-items2-stuff">
+                  <img src="https://patchwiki.biligame.com/images/starengine/6/6c/2qj7axide90ao9sh6dk8g3kxg1yccg4.png" alt="材料">
+                  <div class="items2-stuff-group">
+                    <span style="color: #a2ff17;">11</span><span>/8</span>
+                  </div>
+                </div>
+              </div>
+              <div class="potential-no-items3">
+                <span style="color: #a2ff17;">15364</span><span>/1000</span>
+              </div>
+            </div>
+            <div class="potential-no-act"></div>
+          </div>
+          <!--潜能激发面板——激活-->
+          <div class="potential-light"></div>
+        </div>
+
+        <!--档案面板-->
+        <div class="archive-panel" style="display: none;">
+          <div class="archive-bg">
+            <div class="char-archive">
+              <span id="char-archive-name">米米</span>
+              <span id="char-archive-title">看板娘</span>
+            </div>
+            <div class="char-archive-full-name" id="char-archive-desc-name"></div>
+            <div class="archive-detail">
+              <div>
+                <span>生日:</span>
+                <span id="char-archive-desc-birthday">8月2日</span>
+              </div>
+              <div>
+                <span>喜欢的食物:</span>
+                <span id="char-archive-desc-likefood">精致的便当盒</span>
+              </div>
+              <div class="char-archive-desc-box">
+                <span id="char-archive-desc-desc">&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。<br>&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!--技能模式切换按钮-->
+        <div class="skill-mode-wrapper">
+          <div class="skill-mode" id="skill-mode-preview">
+            <div class="skill-tabs-list">
+              <div class="circle active" data-mode="pve"><span>PVE</span></div>
+              <div class="circle" data-mode="pvp"><span>PVP</span></div>
+              <div class="active-indicator"></div>
+            </div>
+          </div>
+        </div>
+
+        <!--右侧底部四个功能标签-->
+        <div class="function-tags" id="preview-function-tags">
+          <span class="function-tag file-tag">档案</span>
+          <span class="function-tag contract-tag">契约</span>
+          <span class="function-tag skin-tag">皮肤</span>
+          <span class="function-tag expression-tag">表情</span>
+        </div>
+      </div>
+
+      <!--左侧上层两侧浮动箭头-->
+      <img class="float-icon left-float" src="https://patchwiki.biligame.com/images/starengine/4/46/naoykg8q9dhochmupe2atjergapwl2u.png" alt="左侧图标">
+      <img class="float-icon right-float" src="https://patchwiki.biligame.com/images/starengine/4/46/naoykg8q9dhochmupe2atjergapwl2u.png" alt="右侧图标">
+      
+      <!--水印-->
+      <div class="watermark">星引擎Wiki@https://wiki.biligame.com/starengine</div>
+    </div>
+    <!-- 右侧区域结束 -->
+  </div>
+
+  <!--++卡片编辑++ -->
+  <div class="edit-section">
+    <h3>⚙️ 编辑角色</h3>
+    
+    <!-- 固定内容，始终显示在顶部 -->
+    <div class="control-group top-switches" style="flex-direction: column; flex-wrap: nowrap; width: 100%; box-sizing: border-box;">
+      <!-- 第一行：文件上传 -->
+      <div class="control-group" style="flex-wrap: nowrap; margin-bottom: 10px;">
+        <label>角色立绘上传</label>
+        <button class="btn" id="upload-avatar-btn">选择图片</button>
+        <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
+        
+        <label style="margin-left: 15px;">技能图标上传</label>
+        <button class="btn" id="upload-skill-icon-btn">选择图片</button>
+        <input type="file" id="skill-icon-file-input" accept="image/*" style="display:none">
+        <p style="font-size:12px; color:#aaa; margin:0; white-space: nowrap;">立绘上传后可使用鼠标滚轮缩放，左键拖拽调整位置</p>
+      </div>
+    
+      <!-- 第二行：三个开关，包裹在一个不换行的容器中 -->
+      <div class="switch-row" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 15px; margin-bottom: 10px;">
+        <div class="control-item">
+          <label>是否显示潜能激发</label>
+          <div class="switch-btn" id="potential-switch"></div>
+        </div>
+        <div class="control-item">
+          <label>是否显示点击预览</label>
+          <div class="switch-btn" id="clickpreview-switch"></div>
+        </div>
+        <div class="control-item">
+          <label>是否显示技能模式切换</label>
+          <div class="switch-btn" id="skill-mode-switch"></div>
+        </div>
+      </div>
+    
+      <!-- 第三行：角色名、全名、称号 -->
+      <div class="control-group" style="flex-wrap: nowrap;">
+        <label>角色名</label>
+        <div class="text-input" contenteditable="true" id="input-char-name">米米</div>
+        <label>全名</label>
+        <div class="text-input" contenteditable="true" id="input-archive-fullname"></div>
+        <label>称号</label>
+        <div class="text-input" contenteditable="true" id="input-char-title">看板娘</div>
+      </div>
+    </div>
+
+    <!-- 默认编辑区（技能/升级标签激活时可见） -->
+    <div id="skill-edit-area">
+      <div class="control-group">
+        <label>攻击数值</label>
+        <div class="number-input" contenteditable="true" id="input-stat-atk">1</div>
+        <label>防御数值</label>
+        <div class="number-input" contenteditable="true" id="input-stat-def">1</div>
+        <label>血量数值</label>
+        <div class="number-input" contenteditable="true" id="input-stat-hp">9</div>
+        <div class="control-item">
+          <label>合作挑战等级</label>
+          <input type="number" class="number-input" id="input-level-number" min="0" max="6" value="5" step="1">
+        </div>
+        <div class="control-item">
+          <label>亲密度等级 (0-5)</label>
+          <input type="number" class="number-input" id="input-intimacy-level" min="0" max="5" value="3" step="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>主动技能名称</label>
+        <div class="text-input" contenteditable="true" id="input-active-name">商品补货</div>
+        <label>CD时间</label>
+        <div class="text-input" contenteditable="true" id="input-cd-time">3</div>
+        <label>主动技能描述</label>
+        <div class="textarea-input" contenteditable="true" id="input-active-desc">丢弃全部手牌，随后获得原手牌数量{{#ff4646|+1}}张卡牌。</div>
+      </div>
+      
+      <div class="control-group">
+        <label>被动技能名称</label>
+        <div class="text-input" contenteditable="true" id="input-passive-name">过期回收</div>
+        <label>被动技能描述</label>
+        <div class="textarea-input" contenteditable="true" id="input-passive-desc">每丢弃1张战斗牌，获得1星币。</div>
+      </div>
+    </div>
+
+    <!-- 潜能编辑区 -->
+    <div id="potential-edit-area" style="display: none;">
+      <div class="control-group">
+        <label>潜能激发描述</label>
+        <div class="textarea-input" contenteditable="true" id="input-potential-desc">每累计获得25张卡牌，获得1个筹码。</div>
+      </div>
+      <div class="control-group">
+        <div class="control-item">
+          <label>激发状态</label>
+          <div class="switch-btn" id="active-state-switch"></div>
+        </div>
+      </div>
+      <div class="control-group" id="material-select-group" style="display: none;">
+        <label>材料选择</label>
+        <select id="material-select">
+          <option value="yangyan">阳炎徽章</option>
+          <option value="yueguang">月光徽章</option>
+          <option value="shanluan">山峦徽章</option>
+          <option value="bingyuan">冰原徽章</option>
+          <option value="daqi">大气徽章</option>
+          <option value="chuanhe">川河徽章</option>
+          <option value="rongyan">熔岩徽章</option>
+          <option value="yinying">阴影徽章</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 档案编辑区 -->
+    <div id="archive-edit-area" style="display: none;">
+      <div class="control-group">
+        <label>生日</label>
+        <div class="text-input" contenteditable="true" id="input-archive-birthday">8月2日</div>
+      </div>
+      <div class="control-group">
+        <label>喜欢的食物</label>
+        <div class="text-input" contenteditable="true" id="input-archive-likefood">精致的便当盒</div>
+      </div>
+      <div class="control-group">
+        <label>背景描述</label>
+        <div class="textarea-input" contenteditable="true" id="input-archive-desc">&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。\n&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。</div>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button class="btn" id="save-img-btn">保存图片</button>
+      <button class="btn secondary" id="reset-btn">重置默认</button>
+      <button class="btn" id="import-json-btn" style="background: #FF9800;">导入数据</button>
+    </div>
+    <!-- 导入数据用的隐藏文件选择器 -->
+    <input type="file" id="import-file-input" accept="image/*" style="display:none;">
+  </div>
+</div>
+
+<script>
+(function() {
+  // ---------- 1. PVE/PVP 模式切换 UI + 数据同步 ----------
+  const circles = document.querySelectorAll('.circle');
+  const indicator = document.querySelector('.active-indicator');
+  const container = document.querySelector('.skill-tabs-list');
+  let currentSkillMode = 'pve'; // 默认
+  
+  //  设置 UI 指示器位置，根据当前 active 的 circle 计算 translateX
+  function setSkillModeUI(mode) {
+    circles.forEach(c => {
+      if (c.dataset.mode === mode) c.classList.add('active');
+      else c.classList.remove('active');
+    });
+    if (indicator) {
+      const activeCircle = document.querySelector('.circle.active');
+      if (activeCircle) {
+        const circleWidth = circles[0].offsetWidth;
+        const gap = parseInt(getComputedStyle(container).gap) || 0;
+        const index = Array.from(circles).indexOf(activeCircle);
+        indicator.style.transform = `translateX(${index * (circleWidth + gap)}px)`;
+      }
+    }
+  }
+  
+  if (circles.length && indicator && container) {
+    circles.forEach((circle, index) => {
+      circle.addEventListener('click', function() {
+        if (this.classList.contains('active')) return;
+        const newMode = this.dataset.mode;
+        circles.forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        indicator.style.transform = `translateX(${index * (circles[0].offsetWidth + parseInt(getComputedStyle(container).gap))}px)`;
+        currentSkillMode = newMode;
+        //  模式切换后刷新编辑区显示对应技能数据
+        syncEditAreaToMode();
+        updatePreview();
+      });
+    });
+  }
+  
+  //  根据 currentSkillMode 将编辑区的技能输入框切换为 PVE 或 PVP 数据
+  function syncEditAreaToMode() {
+    if (currentSkillMode === 'pve') {
+      document.getElementById('input-active-name').innerText = charData.pveActiveName;
+      document.getElementById('input-cd-time').innerText = charData.cdTime;
+      document.getElementById('input-active-desc').innerText = charData.pveActiveDesc;
+      document.getElementById('input-passive-name').innerText = charData.pvePassiveName;
+      document.getElementById('input-passive-desc').innerText = charData.pvePassiveDesc;
+    } else {
+      document.getElementById('input-active-name').innerText = charData.pvpActiveName;
+      document.getElementById('input-cd-time').innerText = charData.cdTime;
+      document.getElementById('input-active-desc').innerText = charData.pvpActiveDesc;
+      document.getElementById('input-passive-name').innerText = charData.pvpPassiveName;
+      document.getElementById('input-passive-desc').innerText = charData.pvpPassiveDesc;
+    }
+  }
+
+  // 将 charData 的所有字段同步到对应编辑控件（用于导入数据后刷新 UI）
+  function syncEditControls() {
+    document.getElementById('input-char-name').innerText = charData.charName;
+    document.getElementById('input-archive-fullname').innerText = charData.fullName || '';
+    document.getElementById('input-char-title').innerText = charData.charTitle;
+    document.getElementById('input-stat-atk').innerText = charData.statAtk;
+    document.getElementById('input-stat-def').innerText = charData.statDef;
+    document.getElementById('input-stat-hp').innerText = charData.statHp;
+    document.getElementById('input-level-number').value = charData.levelNumber;
+    document.getElementById('input-intimacy-level').value = charData.intimacyLevel;
+    document.getElementById('input-potential-desc').innerText = charData.potentialDesc;
+    const activeStateSwitch = document.getElementById('active-state-switch');
+    if (charData.activeState) {
+      activeStateSwitch.classList.add('active');
+    } else {
+      activeStateSwitch.classList.remove('active');
+    }
+    document.getElementById('material-select').value = charData.material;
+    document.getElementById('material-select-group').style.display = 
+      (charData.enablePotential && !charData.activeState) ? 'flex' : 'none';
+    document.getElementById('input-archive-birthday').innerText = charData.archiveBirthday;
+    document.getElementById('input-archive-likefood').innerText = charData.archiveLikeFood;
+    document.getElementById('input-archive-desc').innerText = charData.archiveDesc;
+    const potentialSwitch = document.getElementById('potential-switch');
+    if (charData.enablePotential) {
+      potentialSwitch.classList.add('active');
+    } else {
+      potentialSwitch.classList.remove('active');
+    }
+    const clickPreviewSwitch = document.getElementById('clickpreview-switch');
+    if (charData.enableClickPreview) {
+      clickPreviewSwitch.classList.add('active');
+    } else {
+      clickPreviewSwitch.classList.remove('active');
+    }
+    const skillModeSwitch = document.getElementById('skill-mode-switch');
+    if (charData.enableSkillMode) {
+      skillModeSwitch.classList.add('active');
+    } else {
+      skillModeSwitch.classList.remove('active');
+    }
+  }
+  
+  // 保存当前编辑区技能数据到 charData（依据 currentSkillMode）
+  function saveCurrentSkillData() {
+    const activeName = document.getElementById('input-active-name')?.innerText.trim();
+    const activeDesc = document.getElementById('input-active-desc')?.innerText.trim();
+    const passiveName = document.getElementById('input-passive-name')?.innerText.trim();
+    const passiveDesc = document.getElementById('input-passive-desc')?.innerText.trim();
+    const cdTime = document.getElementById('input-cd-time')?.innerText.trim();
+    
+    if (currentSkillMode === 'pve') {
+      charData.pveActiveName = activeName || charData.pveActiveName;
+      charData.pveActiveDesc = activeDesc || charData.pveActiveDesc;
+      charData.pvePassiveName = passiveName || charData.pvePassiveName;
+      charData.pvePassiveDesc = passiveDesc || charData.pvePassiveDesc;
+    } else {
+      charData.pvpActiveName = activeName || charData.pvpActiveName;
+      charData.pvpActiveDesc = activeDesc || charData.pvpActiveDesc;
+      charData.pvpPassiveName = passiveName || charData.pvpPassiveName;
+      charData.pvpPassiveDesc = passiveDesc || charData.pvpPassiveDesc;
+    }
+    if (cdTime !== undefined) charData.cdTime = cdTime;
+  }
+
+  // ---------- 2. 全局变量与图片拖拽缩放逻辑 ----------
+  const containerDiv = document.getElementById('character-diy-container');
+  if (!containerDiv) return;
+
+  let img = document.getElementById('preview-avatar');
+  let isDragging = false;
+  let startX, startY;
+  let translateX = 0, translateY = 0, scale = 1;
+
+  function resetImageTransform() {
+    translateX = 0; translateY = 0; scale = 1;
+    if (img) img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  }
+  
+  function initImageInteractions() {
+    if (!img) return;
+    img.style.cursor = 'grab';
+    img.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    img.addEventListener('wheel', onWheel, { passive: false });
+    img.addEventListener('dragstart', (e) => e.preventDefault());
+  }
+  
+  function onMouseDown(e) {
+    e.preventDefault();
+    isDragging = true;
+    img.style.cursor = 'grabbing';
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+  }
+  
+  function onMouseMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+  }
+  
+  function onMouseUp(e) {
+    if (isDragging) {
+      isDragging = false;
+      img.style.cursor = 'grab';
+    }
+  }
+  
+  function onWheel(e) {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    let newScale = scale + delta;
+    newScale = Math.min(3, Math.max(0.3, newScale));
+    scale = newScale;
+    updateTransform();
+  }
+  
+  function updateTransform() {
+    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  }
+
+  // ---------- 3. 辅助函数 ----------
+  // 对文本进行 HTML 实体转义，防止注入
+  function escapeHtml(unsafe) {
+    return unsafe.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
+  //  解析并转换 {{#颜色|文字}} 格式为 span 高亮，同时处理特殊空格和换行
+  function parseColorText(text) {
+    if (!text) return '';
+    // 临时替换特殊空格避免被转义破坏
+    let temp = text.replace(/&nbsp;/g, '{{nbsp}}').replace(/&emsp;/g, '{{emsp}}').replace(/&ensp;/g, '{{ensp}}');
+    const regex = /\{\{#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\|([^}]+)\}\}/g;
+    let result = '';
+    let lastIndex = 0;
+    let match;
+    while ((match = regex.exec(temp)) !== null) {
+      result += escapeHtml(temp.substring(lastIndex, match.index));
+      const color = '#' + match[1];
+      const content = escapeHtml(match[2]);
+      result += `<span style="color: ${color};">${content}</span>`;
+      lastIndex = regex.lastIndex;
+    }
+    result += escapeHtml(temp.substring(lastIndex));
+    // 恢复特殊空格
+    result = result.replace(/{{nbsp}}/g, '&nbsp;').replace(/{{emsp}}/g, '&emsp;').replace(/{{ensp}}/g, '&ensp;');
+    result = result.replace(/\n/g, '<br>');
+    return result;
+  }
+
+  // ---------- 4. 材料图片映射 ----------
+  const materialImages = {
+    yangyan: 'https://patchwiki.biligame.com/images/starengine/6/6c/2qj7axide90ao9sh6dk8g3kxg1yccg4.png',
+    yueguang: 'https://patchwiki.biligame.com/images/starengine/c/ce/bc7btapqpzb9vtpvopa91544v56ab13.png',
+    shanluan: 'https://patchwiki.biligame.com/images/starengine/7/7f/1ba69zpsf35pw84ct91p8mnovnjwpnc.png',
+    bingyuan: 'https://patchwiki.biligame.com/images/starengine/d/d4/ldzfh87q42bt8vj99s4apap1rbum9zt.png',
+    daqi: 'https://patchwiki.biligame.com/images/starengine/a/ab/g0yci7vecx4rpo52txo6bc7w3akmqme.png',
+    chuanhe: 'https://patchwiki.biligame.com/images/starengine/1/15/1w26df0q350id78qhg13o6nabmfra8f.png',
+    rongyan: 'https://patchwiki.biligame.com/images/starengine/a/a0/1yuhqdwos98p59pndxtu33qanxsoak6.png',
+    yinying: 'https://patchwiki.biligame.com/images/starengine/b/b1/27k2yll9gufyqqrf9krlhrsoshey8kt.png'
+  };
+
+  // ---------- 5. 角色数据模型 ----------
+  let charData = {
+    charName: '米米',
+    fullName: '',
+    charTitle: '看板娘',
+    tagSkill: '技能',
+    tagUpgrade: '升级',
+    tagPotential: '潜能',
+    tagArchive: '档案',
+    statAtk: 1, statDef: 1, statHp: 9,
+    levelNumber: 5,   // 默认值设为 5 与 HTML value=5 一致
+    enablePotential: false,
+    potentialText: '潜能激发',
+    pveActiveName: '商品补货',
+    pveActiveDesc: '丢弃全部手牌，随后获得原手牌数量{{#ff4646|+1}}张卡牌。',
+    cdTime: '3',
+    pvePassiveName: '过期回收',
+    pvePassiveDesc: '每丢弃1张战斗牌，获得1星币。',
+    pvpActiveName: '',
+    pvpActiveDesc: '',
+    pvpPassiveName: '',
+    pvpPassiveDesc: '',
+    intimacyLevel: 3,
+    avatarUrl: 'https://patchwiki.biligame.com/images/starengine/e/e3/sqjeojqr22j322mp104zwhwztfvdrei.png',
+    bgUrl: 'https://patchwiki.biligame.com/images/starengine/5/57/nfdf4valfnmo6cykwhgxswkgpg0nbcb.png',
+    enableClickPreview: false,
+    enableSkillMode: false,
+    potentialDesc: '每累计获得25张卡牌，获得1个筹码。',
+    activeState: true,
+    material: 'yangyan',
+    skillIconUrl: 'https://patchwiki.biligame.com/images/starengine/9/9a/cshh2jxyoo2lmldzobwbf6h3bnm7qb0.png',
+    archiveBirthday: '8月2日',
+    archiveLikeFood: '精致的便当盒',
+    archiveDesc: '&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。\n&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。'
+  };
+
+  //  尝试从 localStorage 恢复保存的数据，使用 spread 合并避免缺失新属性
+  try {
+    const saved = localStorage.getItem('characterDIY_final5');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      charData = { ...charData, ...parsed };
+    }
+  } catch(e) { console.warn(e); }
+
+  function saveData() {
+    try {
+      localStorage.setItem('characterDIY_final5', JSON.stringify(charData));
+    } catch(e) { console.warn(e); }
+  }
+
+  // ---------- PNG 元数据工具 ----------
+  //  将字符串转为 Uint8Array
+  function stringToBytes(str) {
+    return new TextEncoder().encode(str);
+  }
+  function bytesToString(bytes) {
+    return new TextDecoder().decode(bytes);
+  }
+  //  从字节数组中读取32位无符号整数（大端）
+  function readUint32(bytes, offset) {
+    return (bytes[offset] << 24) | (bytes[offset+1] << 16) | (bytes[offset+2] << 8) | bytes[offset+3];
+  }
+  function writeUint32(bytes, offset, value) {
+    bytes[offset] = (value >> 24) & 0xFF;
+    bytes[offset+1] = (value >> 16) & 0xFF;
+    bytes[offset+2] = (value >> 8) & 0xFF;
+    bytes[offset+3] = value & 0xFF;
+  }
+  //  计算 CRC32 校验和
+  function crc32(data, start, length) {
+    let crc = 0xFFFFFFFF;
+    for (let i = start; i < start + length; i++) {
+      crc ^= data[i];
+      for (let j = 0; j < 8; j++) {
+        if (crc & 1) crc = (crc >>> 1) ^ 0xEDB88320;
+        else crc = crc >>> 1;
+      }
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  //  在 PNG 文件的 IEND 块之前插入一个 tEXt 块，存入 JSON 数据
+  function embedDataToPNG(originalPngBlob, jsonStr, callback) {
+    const reader = new FileReader();
+    reader.onload = function() {
+      const buffer = new Uint8Array(reader.result);
+      const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+      for (let i = 0; i < 8; i++) {
+        if (buffer[i] !== signature[i]) { callback(null); return; }
+      }
+      const keyword = 'starengine';
+      const keyBytes = stringToBytes(keyword);
+      const textBytes = stringToBytes(jsonStr);
+      const chunkData = new Uint8Array(keyBytes.length + 1 + textBytes.length);
+      chunkData.set(keyBytes);
+      chunkData[keyBytes.length] = 0; // null 分隔符
+      chunkData.set(textBytes, keyBytes.length + 1);
+      const typeBytes = stringToBytes('tEXt');
+      const crcInput = new Uint8Array(4 + chunkData.length);
+      crcInput.set(typeBytes);
+      crcInput.set(chunkData, 4);
+      const computedCrc = crc32(crcInput, 0, crcInput.length);
+
+      // 查找 IEND 位置
+      const iendSignature = [73, 69, 78, 68];
+      let iendPos = -1;
+      for (let i = 0; i < buffer.length - 3; i++) {
+        if (buffer[i]===73 && buffer[i+1]===69 && buffer[i+2]===78 && buffer[i+3]===68) {
+          iendPos = i - 4; break;
+        }
+      }
+      if (iendPos === -1) { callback(null); return; }
+
+      const newPngSize = iendPos + 12 + chunkData.length + 12;
+      const newPng = new Uint8Array(newPngSize);
+      newPng.set(buffer.slice(0, iendPos));
+      writeUint32(newPng, iendPos, chunkData.length);
+      newPng.set(typeBytes, iendPos + 4);
+      newPng.set(chunkData, iendPos + 8);
+      writeUint32(newPng, iendPos + 8 + chunkData.length, computedCrc);
+      newPng.set(buffer.slice(iendPos, iendPos + 12), iendPos + 12 + chunkData.length);
+      callback(new Blob([newPng], { type: 'image/png' }));
+    };
+    reader.readAsArrayBuffer(originalPngBlob);
+  }
+  //  从 PNG 文件的 tEXt 块中提取自定义数据（键为 starengine）
+  function extractDataFromPNG(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function() {
+      const buffer = new Uint8Array(reader.result);
+      let offset = 8;
+      while (offset < buffer.length - 8) {
+        const length = readUint32(buffer, offset);
+        const type = bytesToString(buffer.slice(offset + 4, offset + 8));
+        if (type === 'tEXt') {
+          const chunkData = buffer.slice(offset + 8, offset + 8 + length);
+          let nullPos = 0;
+          while (nullPos < chunkData.length && chunkData[nullPos] !== 0) nullPos++;
+          if (nullPos < chunkData.length) {
+            const textBytes = chunkData.slice(nullPos + 1);
+            callback(bytesToString(textBytes));
+            return;
+          }
+        }
+        offset += 12 + length;
+      }
+      callback(null);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ---------- 6. 面板切换逻辑 ----------
+  const potentialTag = document.getElementById('preview-tag-potential-container');
+  const archiveTag = document.getElementById('preview-tag-archive-container');
+  const defaultPanel = document.querySelector('.default-panel');
+  const potentialPanel = document.querySelector('.potential-panel');
+  const archivePanel = document.querySelector('.archive-panel');
+  const skillTag = document.querySelector('.skill-tag');
+  const upgradeTag = document.querySelector('.upgrade-tag');
+  
+  let potentialPanelActive = false;
+  let archivePanelActive = false;
+  let skillModeForcedHidden = false;
+
+  //  根据当前激活的面板显示对应编辑区
+  function updateEditAreaVisibility() {
+    const skillArea = document.getElementById('skill-edit-area');
+    const potentialArea = document.getElementById('potential-edit-area');
+    const archiveArea = document.getElementById('archive-edit-area');
+    
+    if (potentialPanelActive) {
+      skillArea.style.display = 'none';
+      archiveArea.style.display = 'none';
+      potentialArea.style.display = 'block';
+    } else if (archivePanelActive) {
+      skillArea.style.display = 'none';
+      potentialArea.style.display = 'none';
+      archiveArea.style.display = 'block';
+    } else {
+      skillArea.style.display = 'block';
+      potentialArea.style.display = 'none';
+      archiveArea.style.display = 'none';
+    }
+  }
+
+  //  更新底部标签样式，激活的标签使用高亮背景，其余强制变暗
+  function updateTagColors() {
+    if (potentialPanelActive && charData.enablePotential) {
+      potentialTag.classList.add('potential-active');
+      potentialTag.classList.remove('force-pink');
+      [skillTag, upgradeTag, archiveTag].forEach(tag => { if (tag) tag.classList.add('force-pink'); });
+    } else if (archivePanelActive) {
+      archiveTag.classList.add('archive-active');
+      archiveTag.classList.remove('force-pink');
+      [skillTag, upgradeTag, potentialTag].forEach(tag => { if (tag) tag.classList.add('force-pink'); });
+    } else {
+      potentialTag.classList.remove('potential-active');
+      archiveTag.classList.remove('archive-active');
+      [skillTag, upgradeTag, potentialTag, archiveTag].forEach(tag => { if (tag) tag.classList.remove('force-pink'); });
+    }
+  }
+
+  function forceHideSkillMode() {
+    const skillModePreview = document.getElementById('skill-mode-preview');
+    if (skillModePreview) {
+      skillModePreview.style.display = 'none';
+      skillModeForcedHidden = true;
+    }
+  }
+  
+  function restoreSkillMode() {
+    const skillModePreview = document.getElementById('skill-mode-preview');
+    //  只有开启了技能模式开关，且当前未强制隐藏时才显示
+    if (skillModePreview && charData.enableSkillMode) {
+      skillModePreview.style.display = 'block';
+    }
+    skillModeForcedHidden = false;
+  }
+
+  function togglePotentialPanel() {
+    if (!charData.enablePotential) return;
+    if (archivePanelActive) {
+      archivePanelActive = false;
+      archivePanel.style.display = 'none';
+    }
+    potentialPanelActive = !potentialPanelActive;
+    if (potentialPanelActive) {
+      saveCurrentSkillData();
+      forceHideSkillMode();
+      defaultPanel.style.display = 'none';
+      potentialPanel.style.display = 'flex';
+      archivePanel.style.display = 'none';
+    } else {
+      restoreSkillMode();
+      defaultPanel.style.display = 'block';
+      potentialPanel.style.display = 'none';
+    }
+    updateTagColors();
+    updateEditAreaVisibility();
+  }
+
+  function toggleArchivePanel() {
+    if (potentialPanelActive) {
+      potentialPanelActive = false;
+      potentialPanel.style.display = 'none';
+    }
+    archivePanelActive = !archivePanelActive;
+    if (archivePanelActive) {
+      saveCurrentSkillData();
+      forceHideSkillMode();
+      defaultPanel.style.display = 'none';
+      archivePanel.style.display = 'flex';
+      potentialPanel.style.display = 'none';
+    } else {
+      restoreSkillMode();
+      defaultPanel.style.display = 'block';
+      archivePanel.style.display = 'none';
+    }
+    updateTagColors();
+    updateEditAreaVisibility();
+  }
+
+  if (potentialTag) {
+    potentialTag.style.cursor = 'pointer';
+    potentialTag.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (charData.enablePotential) togglePotentialPanel();
+    });
+  }
+  
+  if (archiveTag) {
+    archiveTag.style.cursor = 'pointer';
+    archiveTag.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleArchivePanel();
+    });
+  }
+  
+  //  点击技能或升级标签时，关闭所有特殊面板，回到默认面板
+  if (skillTag) {
+    skillTag.style.cursor = 'pointer';
+    skillTag.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (potentialPanelActive) {
+        potentialPanelActive = false;
+        potentialPanel.style.display = 'none';
+      }
+      if (archivePanelActive) {
+        archivePanelActive = false;
+        archivePanel.style.display = 'none';
+      }
+      defaultPanel.style.display = 'block';
+      updateTagColors();
+      updateEditAreaVisibility();
+      restoreSkillMode();
+    });
+  }
+  
+  if (upgradeTag) {
+    upgradeTag.style.cursor = 'pointer';
+    upgradeTag.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (potentialPanelActive) {
+        potentialPanelActive = false;
+        potentialPanel.style.display = 'none';
+      }
+      if (archivePanelActive) {
+        archivePanelActive = false;
+        archivePanel.style.display = 'none';
+      }
+      defaultPanel.style.display = 'block';
+      updateTagColors();
+      updateEditAreaVisibility();
+      restoreSkillMode();
+    });
+  }
+
+  // ---------- 7. 核心预览更新函数 ----------
+  //  根据 charData 和当前模式，更新预览卡片的所有元素；isInit 为 true 时额外同步编辑区控件
+  function updatePreview(isInit = false) {
+    if (!isInit) saveCurrentSkillData();
+    
+    document.getElementById('preview-left-name1').innerText = charData.charTitle;
+    document.getElementById('preview-left-name2').innerText = charData.charName;
+    document.getElementById('preview-right-name').innerText = charData.charName;
+    document.getElementById('preview-right-title').innerText = charData.charTitle;
+    document.getElementById('preview-tag-text-skill').innerText = charData.tagSkill;
+    document.getElementById('preview-tag-text-upgrade').innerText = charData.tagUpgrade;
+    document.getElementById('preview-tag-text-potential').innerText = charData.tagPotential;
+    document.getElementById('preview-tag-text-archive').innerText = charData.tagArchive;
+    document.getElementById('preview-stat-value-atk').innerText = charData.statAtk;
+    document.getElementById('preview-stat-value-def').innerText = charData.statDef;
+    document.getElementById('preview-stat-value-hp').innerText = charData.statHp;
+    document.getElementById('preview-level-number').innerText = charData.levelNumber;
+    document.getElementById('preview-potential-text').innerText = charData.potentialText;
+    
+    const potTrigger = document.getElementById('preview-potential-trigger');
+    if (potTrigger) potTrigger.style.display = charData.enablePotential ? 'flex' : 'none';
+    if (potentialTag) potentialTag.style.display = charData.enablePotential ? 'flex' : 'none';
+    
+    // 若关闭潜能后仍处于潜能面板激活状态，自动切回默认
+    if (!charData.enablePotential && potentialPanelActive) {
+      potentialPanelActive = false;
+      defaultPanel.style.display = 'block';
+      potentialPanel.style.display = 'none';
+      updateTagColors();
+      updateEditAreaVisibility();
+    }
+    
+    // 根据当前模式显示技能
+    const activeName = (currentSkillMode === 'pve') ? charData.pveActiveName : charData.pvpActiveName;
+    const activeDesc = (currentSkillMode === 'pve') ? charData.pveActiveDesc : charData.pvpActiveDesc;
+    const passiveName = (currentSkillMode === 'pve') ? charData.pvePassiveName : charData.pvpPassiveName;
+    const passiveDesc = (currentSkillMode === 'pve') ? charData.pvePassiveDesc : charData.pvpPassiveDesc;
+    
+    document.getElementById('preview-active-skill-name').innerText = '主动技能：' + (activeName || '');
+    document.getElementById('preview-active-desc').innerHTML = parseColorText(activeDesc);
+    document.getElementById('preview-passive-skill-name').innerText = '被动技能：' + (passiveName || '');
+    document.getElementById('preview-passive-desc').innerHTML = parseColorText(passiveDesc);
+    document.getElementById('preview-cd-time').innerText = charData.cdTime;
+    
+    // 更新爱心容器状态
+    const heartContainers = document.querySelectorAll('.heart-container');
+    heartContainers.forEach((container, index) => {
+      if (index < charData.intimacyLevel) container.classList.add('filled');
+      else container.classList.remove('filled');
+    });
+    
+    // 亲密度满级时进度条变为红色，否则半透明黑
+    const intimacyBar = document.querySelector('.intimacy-bar');
+    if (intimacyBar) intimacyBar.style.backgroundColor = (charData.intimacyLevel < 5) ? 'rgba(0,0,0,0.5)' : '#e62260';
+    
+    const levelTexts = ['0/20', '0/120', '0/600', '0/3000', '0/6000', 'MAX'];
+    document.getElementById('preview-intimacy-value').innerText = levelTexts[charData.intimacyLevel] || '0/20';
+    
+    const avatarImg = document.getElementById('preview-avatar');
+    if (avatarImg.src !== charData.avatarUrl) {
+      avatarImg.crossOrigin = "anonymous";
+      avatarImg.src = charData.avatarUrl;
+      avatarImg.onload = function() {
+        // 若存在延迟变换（导入时设置），则应用，否则重置图片位置缩放
+        if (window._pendingTransform) {
+          const t = window._pendingTransform;
+          translateX = t.translateX;
+          translateY = t.translateY;
+          scale = t.scale;
+          updateTransform();
+          delete window._pendingTransform;
+        } else {
+          resetImageTransform();
+        }
+      };
+    }
+    
+    document.getElementById('preview-clickpreview').style.display = charData.enableClickPreview ? 'block' : 'none';
+    
+    const skillModeEl = document.getElementById('skill-mode-preview');
+    if (skillModeEl) {
+      if (skillModeForcedHidden) {
+        skillModeEl.style.display = 'none';
+      } else {
+        skillModeEl.style.display = charData.enableSkillMode ? 'block' : 'none';
+      }
+    }
+    
+    document.getElementById('char-potential-name').innerText = charData.charName;
+    document.querySelector('.char-potential-desc').innerHTML = parseColorText(charData.potentialDesc);
+    
+    // 根据激活状态显示未激活面板或已激活光效
+    const potentialNo = document.querySelector('.potential-no');
+    const potentialLight = document.querySelector('.potential-light');
+    if (potentialNo && potentialLight) {
+      potentialNo.style.display = charData.activeState ? 'none' : 'grid';
+      potentialLight.style.display = charData.activeState ? 'block' : 'none';
+    }
+    
+    const materialImg = document.querySelector('.potential-no-items2-stuff img');
+    if (materialImg) materialImg.src = materialImages[charData.material] || materialImages.yangyan;
+    
+    // 档案：全名为空时用角色名代替
+    const displayFullName = charData.fullName && charData.fullName.trim() !== '' ? charData.fullName : charData.charName;
+    document.getElementById('char-archive-name').innerText = charData.charName;
+    document.getElementById('char-archive-title').innerText = charData.charTitle;
+    document.getElementById('char-archive-desc-name').innerHTML = parseColorText(displayFullName);
+    document.getElementById('char-archive-desc-birthday').innerHTML = parseColorText(charData.archiveBirthday);
+    document.getElementById('char-archive-desc-likefood').innerHTML = parseColorText(charData.archiveLikeFood);
+    document.getElementById('char-archive-desc-desc').innerHTML = parseColorText(charData.archiveDesc);
+    
+    document.getElementById('skill-tag-icon').src = charData.skillIconUrl;
+    
+    //  首次初始化时同步开关状态和编辑控件
+    if (isInit) {
+      const potentialSwitch = document.getElementById('potential-switch');
+      if (charData.enablePotential) potentialSwitch.classList.add('active'); else potentialSwitch.classList.remove('active');
+      const clickPreviewSwitch = document.getElementById('clickpreview-switch');
+      if (charData.enableClickPreview) clickPreviewSwitch.classList.add('active'); else clickPreviewSwitch.classList.remove('active');
+      const skillModeSwitch = document.getElementById('skill-mode-switch');
+      if (charData.enableSkillMode) skillModeSwitch.classList.add('active'); else skillModeSwitch.classList.remove('active');
+      
+      document.getElementById('input-intimacy-level').value = charData.intimacyLevel;
+      syncEditAreaToMode();
+      document.getElementById('input-char-name').innerText = charData.charName;
+      document.getElementById('input-archive-fullname').innerText = charData.fullName;
+      document.getElementById('input-char-title').innerText = charData.charTitle;
+      document.getElementById('input-stat-atk').innerText = charData.statAtk;
+      document.getElementById('input-stat-def').innerText = charData.statDef;
+      document.getElementById('input-stat-hp').innerText = charData.statHp;
+      document.getElementById('input-level-number').value = charData.levelNumber;
+      document.getElementById('input-potential-desc').innerText = charData.potentialDesc;
+      document.getElementById('input-archive-birthday').innerText = charData.archiveBirthday;
+      document.getElementById('input-archive-likefood').innerText = charData.archiveLikeFood;
+      document.getElementById('input-archive-desc').innerText = charData.archiveDesc;
+      document.getElementById('material-select').value = charData.material;
+      const activeStateSwitch = document.getElementById('active-state-switch');
+      if (charData.activeState) activeStateSwitch.classList.add('active'); else activeStateSwitch.classList.remove('active');
+      document.getElementById('material-select-group').style.display = (charData.enablePotential && !charData.activeState) ? 'flex' : 'none';
+    }
+    
+    //  修正左侧称号/名字的绝对定位偏移量，确保文字长度变化时仍保持在原始右侧位置
+    (function adjustLeftName1Position() {
+      const leftName1 = document.getElementById('preview-left-name1');
+      if (!leftName1) return;
+      function getCurrentTranslateX(el) {
+        const style = window.getComputedStyle(el);
+        const transform = style.transform;
+        if (transform === 'none') return 0;
+        const matrix = transform.match(/matrix.*\((.+)\)/);
+        if (matrix) {
+          const values = matrix[1].split(', ');
+          if (values.length === 6) return parseFloat(values[4]) || 0;
+          if (values.length === 16) return parseFloat(values[12]) || 0;
+        }
+        return 0;
+      }
+      const rawRight = leftName1.offsetLeft + leftName1.offsetWidth;
+      //  初次记录目标右边界，后续根据其与当前实际右边界差值调整 translateX
+      if (window.__leftName1TargetRight === undefined) {
+        const currentTx = getCurrentTranslateX(leftName1);
+        window.__leftName1TargetRight = rawRight + currentTx;
+      }
+      const target = window.__leftName1TargetRight;
+      const newTx = target - rawRight;
+      leftName1.style.transform = `translateX(${newTx}px)`;
+    })();
+
+    (function adjustLeftName2Position() {
+      const leftName2 = document.getElementById('preview-left-name2');
+      if (!leftName2) return;
+      function getCurrentTranslateX(el) {
+        const style = window.getComputedStyle(el);
+        const transform = style.transform;
+        if (transform === 'none') return 0;
+        const matrix = transform.match(/matrix.*\((.+)\)/);
+        if (matrix) {
+          const values = matrix[1].split(', ');
+          if (values.length === 6) return parseFloat(values[4]) || 0;
+          if (values.length === 16) return parseFloat(values[12]) || 0;
+        }
+        return 0;
+      }
+      const rawRight = leftName2.offsetLeft + leftName2.offsetWidth;
+      if (window.__leftName2TargetRight === undefined) {
+        const currentTx = getCurrentTranslateX(leftName2);
+        window.__leftName2TargetRight = rawRight + currentTx;
+      }
+      const target = window.__leftName2TargetRight;
+      const newTx = target - rawRight;
+      leftName2.style.transform = `translateX(${newTx}px)`;
+    })();
+  }
+
+  // ---------- 8. 编辑区输入绑定 ----------
+  // 双向绑定辅助：监听 contenteditable 的 input 事件，更新 charData 并保存，刷新预览
+  function bindInput(id, key, isNumber = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function() {
+      let val = this.innerText.trim();
+      if (isNumber) val = parseInt(val) || 0;
+      charData[key] = val;
+      saveData();
+      updatePreview(false);
+    });
+  }
+  
+  const textFields = [
+    ['input-char-name', 'charName'],
+    ['input-archive-fullname', 'fullName'],
+  ];
+  textFields.forEach(f => bindInput(f[0], f[1]));
+
+  // ---------- 限制称号输入长度 ----------
+  const titleDiv = document.getElementById('input-char-title');
+  const MAX_TITLE_LENGTH = 9;
+
+  // 通过 beforeinput 拦截，防止超过最大长度的插入
+  titleDiv.addEventListener('beforeinput', function(e) {
+    const currentLength = (titleDiv.innerText || '').length;
+    if (
+      (e.inputType === 'insertText' ||
+      e.inputType === 'insertFromPaste' ||
+      e.inputType === 'insertFromDrop' ||
+      e.inputType === 'insertReplacementText') &&
+      e.data
+    ) {
+      if (currentLength + e.data.length > MAX_TITLE_LENGTH) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  // input 事件兜底，强制截断并同步数据
+  titleDiv.addEventListener('input', function() {
+    let text = titleDiv.innerText;
+    if (text.length > MAX_TITLE_LENGTH) {
+      titleDiv.innerText = text.slice(0, MAX_TITLE_LENGTH);
+      const range = document.createRange();
+      range.selectNodeContents(titleDiv);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    charData.charTitle = titleDiv.innerText;
+    saveData();
+    updatePreview(false);
+  });
+  
+  const numFields = [
+    ['input-stat-atk', 'statAtk', true],
+    ['input-stat-def', 'statDef', true],
+    ['input-stat-hp', 'statHp', true]
+  ];
+  numFields.forEach(f => bindInput(f[0], f[1], f[2]));
+  
+  // 合作挑战等级单独监听，限制 0-6 范围
+  document.getElementById('input-level-number').addEventListener('input', function() {
+    let val = parseInt(this.value, 10);
+    if (isNaN(val)) val = 0;
+    val = Math.min(6, Math.max(0, val));
+    this.value = val;
+    charData.levelNumber = val;
+    saveData();
+    updatePreview(false);
+  });
+  
+  // 亲密度等级监听，限制 0-5 范围
+  document.getElementById('input-intimacy-level').addEventListener('input', function() {
+    let val = parseInt(this.value, 10);
+    if (isNaN(val)) val = 0;
+    val = Math.min(5, Math.max(0, val));
+    charData.intimacyLevel = val;
+    this.value = val;
+    saveData();
+    updatePreview(false);
+  });
+  
+  // 技能字段绑定，根据当前模式写入对应的 PVE/PVP 数据
+  function bindSkillInput(id, modeKeyFunc) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function() {
+      const value = this.innerText.trim();
+      const key = modeKeyFunc(currentSkillMode);
+      charData[key] = value;
+      saveData();
+      updatePreview(false);
+    });
+  }
+  
+  bindSkillInput('input-active-name', (mode) => mode === 'pve' ? 'pveActiveName' : 'pvpActiveName');
+  bindSkillInput('input-cd-time', () => 'cdTime');
+  bindSkillInput('input-active-desc', (mode) => mode === 'pve' ? 'pveActiveDesc' : 'pvpActiveDesc');
+  bindSkillInput('input-passive-name', (mode) => mode === 'pve' ? 'pvePassiveName' : 'pvpPassiveName');
+  bindSkillInput('input-passive-desc', (mode) => mode === 'pve' ? 'pvePassiveDesc' : 'pvpPassiveDesc');
+  
+  // 潜能、档案编辑区绑定
+  bindInput('input-potential-desc', 'potentialDesc');
+  bindInput('input-archive-birthday', 'archiveBirthday');
+  bindInput('input-archive-likefood', 'archiveLikeFood');
+  bindInput('input-archive-desc', 'archiveDesc');
+  
+  // 开关绑定
+  document.getElementById('potential-switch').addEventListener('click', function() {
+    this.classList.toggle('active');
+    charData.enablePotential = this.classList.contains('active');
+    saveData();
+    updatePreview(false);
+  });
+  
+  document.getElementById('clickpreview-switch').addEventListener('click', function() {
+    this.classList.toggle('active');
+    charData.enableClickPreview = this.classList.contains('active');
+    saveData();
+    updatePreview(false);
+  });
+  
+  document.getElementById('skill-mode-switch').addEventListener('click', function() {
+    this.classList.toggle('active');
+    charData.enableSkillMode = this.classList.contains('active');
+    // 关闭技能模式切换时，强制回到 PVE 模式，避免编辑区残留 PVP 内容
+    if (!charData.enableSkillMode) {
+      currentSkillMode = 'pve';
+      setSkillModeUI('pve');
+      syncEditAreaToMode();
+    }
+    saveData();
+    updatePreview(false);
+  });
+  
+  document.getElementById('active-state-switch').addEventListener('click', function() {
+    this.classList.toggle('active');
+    charData.activeState = this.classList.contains('active');
+    saveData();
+    updatePreview(false);
+    document.getElementById('material-select-group').style.display = (charData.enablePotential && !charData.activeState) ? 'flex' : 'none';
+  });
+  
+  document.getElementById('material-select').addEventListener('change', function() {
+    charData.material = this.value;
+    saveData();
+    updatePreview(false);
+  });
+  
+  // 立绘上传
+  document.getElementById('upload-avatar-btn').addEventListener('click', () => document.getElementById('avatar-file-input').click());
+  document.getElementById('avatar-file-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      charData.avatarUrl = ev.target.result;
+      saveData();
+      updatePreview(false);
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  // 技能图标上传
+  document.getElementById('upload-skill-icon-btn').addEventListener('click', () => document.getElementById('skill-icon-file-input').click());
+  document.getElementById('skill-icon-file-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      charData.skillIconUrl = ev.target.result;
+      saveData();
+      updatePreview(false);
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  // ---------- 9. 保存图片（使用 html2canvas + PNG 元数据） ----------
+  document.getElementById('save-img-btn').addEventListener('click', async function() {
+    const btn = this;
+    btn.innerText = "生成中...";
+    btn.disabled = true;
+    await document.fonts.ready;
+    const element = document.getElementById('character-card-preview');
+    const images = element.getElementsByTagName('img');
+    //  等待所有图片加载完成再进行截图，避免出现空白
+    const imagePromises = Array.from(images).map(img => {
+      if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+      return new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; });
+    });
+    try {
+      await Promise.all(imagePromises);
+      const canvas = await html2canvas(element, { scale: 2, backgroundColor: null, logging: false, useCORS: true, allowTaint: false });
+      const jsonStr = JSON.stringify(getExportData());
+      const originalBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (!originalBlob) {
+        throw new Error('无法生成图片Blob');
+      }
+      //  将导出数据嵌入 PNG 的 tEXt 块
+      embedDataToPNG(originalBlob, jsonStr, function(newBlob) {
+        if (!newBlob) {
+          alert('嵌入数据失败');
+          btn.innerText = "保存图片";
+          btn.disabled = false;
+          return;
+        }
+        const link = document.createElement('a');
+        let suffix = '';
+        if (archivePanelActive) {
+          suffix = '(档案)';
+        } else if (potentialPanelActive) {
+          suffix = '(潜能)';
+        } else {
+          if (charData.enableSkillMode) {
+            suffix = `(${currentSkillMode})`;
+          }
+        }
+        link.download = `角色卡_${charData.charName}${suffix}.png`;
+        const url = URL.createObjectURL(newBlob);
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        btn.innerText = "保存图片";
+        btn.disabled = false;
+      });
+    } catch(err) {
+      console.error('截图失败详情：', err);
+      alert('截图失败：' + (err.message || err));
+      btn.innerText = "保存图片";
+      btn.disabled = false;
+    }
+  });
+
+  // ---------- 10.导出 / 导入 ----------
+  const importJsonBtn = document.getElementById('import-json-btn');
+
+  //  收集当前完整导出数据，包括角色数据、图片变换、技能模式
+  function getExportData() {
+    return {
+      version: 1,
+      charData: { ...charData },
+      transform: {
+        translateX: translateX,
+        translateY: translateY,
+        scale: scale
+      },
+      currentSkillMode: currentSkillMode
+    };
+  }
+
+  
+  // 导入文件处理
+  const importFileInput = document.getElementById('import-file-input');
+  importJsonBtn.addEventListener('click', () => {
+    importFileInput.click();
+  });
+
+  importFileInput.addEventListener('change', () => {
+    const file = importFileInput.files[0];
+    if (!file) return;
+    extractDataFromPNG(file, function(jsonStr) {
+      if (!jsonStr) {
+        alert('未检测到数据');
+        importFileInput.value = '';
+        return;
+      }
+      let imported;
+      try {
+        imported = JSON.parse(jsonStr);
+        if (!imported.charData || imported.version === undefined) throw new Error('数据不完整');
+      } catch (err) {
+        alert('导入失败：数据格式错误');
+        importFileInput.value = '';
+        return;
+      }
+
+      //  忽略图片 URL 字段，避免覆盖用户已上传的立绘和图标
+      const ignoredKeys = ['avatarUrl', 'skillIconUrl', 'bgUrl'];
+      Object.keys(imported.charData).forEach(key => {
+        if (!ignoredKeys.includes(key)) charData[key] = imported.charData[key];
+      });
+
+      // 应用技能模式
+      if (imported.currentSkillMode && (imported.currentSkillMode === 'pve' || imported.currentSkillMode === 'pvp')) {
+        currentSkillMode = imported.currentSkillMode;
+        const skillModePreview = document.getElementById('skill-mode-preview');
+        if (skillModePreview) skillModePreview.style.display = 'block';
+        setSkillModeUI(currentSkillMode);
+        syncEditAreaToMode();
+      }
+
+      // 应用变换
+      if (imported.transform) {
+        translateX = imported.transform.translateX ?? 0;
+        translateY = imported.transform.translateY ?? 0;
+        scale = imported.transform.scale ?? 1;
+        updateTransform();
+      }
+
+      //  刷新界面，通过临时重写 updatePreview 强制以初始化模式调用一次，确保编辑控件同步
+      const originalUpdatePreview = updatePreview;
+      updatePreview = function(tempIsInit) {
+        originalUpdatePreview(true);
+        updatePreview = originalUpdatePreview;
+      };
+      saveData();
+      updatePreview(true);
+      syncEditControls();
+      updateEditAreaVisibility();
+
+      //  导入后询问用户是否更换立绘，并保持当前变换状态（用于新图片加载后应用）
+      const wantChangeAvatar = confirm('数据已加载。是否需要更换立绘？\n技能图标需手动上传。');
+      if (wantChangeAvatar) {
+        window._pendingTransform = { translateX, translateY, scale };
+        const uploadBtn = document.getElementById('upload-avatar-btn');
+        if (uploadBtn) uploadBtn.click();
+      }
+      importFileInput.value = '';
+    });
+  });
+  // 导入文件处理结束
+  
+  // ---------- 11. 重置按钮（清空本地存储并刷新） ----------
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if(confirm("确定要重置所有修改吗？")) {
+      localStorage.removeItem('characterDIY_final5');
+      location.reload();
+    }
+  });
+
+  // ---------- 12. 初始化：拖拽、预览、隐藏档案编辑控件 ----------
+  img = document.getElementById('preview-avatar');
+  initImageInteractions();
+  setSkillModeUI(currentSkillMode);
+  updatePreview(true);
+  updateEditAreaVisibility();
+
+})();
+</script>
+<script src="/js/nav.js"></script>
+</body></html>
+  
