@@ -95,11 +95,15 @@
 }
 
 .placeholder-text {
-  font-size: clamp(1rem, 2.5vw, 1.8rem);
-  color: rgba(255, 255, 255, 0.55);
-  font-weight: 300;
-  letter-spacing: 0.05em;
+  display: inline-block;
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: #1e293b;
+  padding: 0.5rem 1.2rem;
+  border-radius: 2rem;
+  font-weight: 450;
+  letter-spacing: normal;
   user-select: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 /* ========== 底部友情链接 ========== */

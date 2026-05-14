@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal
 set /p msg=请输入本次修改描述:
 if "%msg%"=="" set msg=更新网站
