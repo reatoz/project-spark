@@ -1,0 +1,126 @@
+/* ========== 公告详情页 Markdown 内容样式 ========== */
+
+/* 容器内所有文字基础颜色 */
+#content {
+    color: #494848;
+    line-height: 1.8;
+    font-size: 1rem;
+  }
+  
+  /* 标题 */
+  #content h1,
+  #content h2,
+  #content h3,
+  #content h4 {
+    color: #ffffff;
+    margin-top: 1.5em;
+    margin-bottom: 0.6em;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 0.3em;
+  }
+  
+  /* 段落 */
+  #content p {
+    margin-bottom: 1em;
+  }
+  
+  /* 行内代码 */
+  #content code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+  }
+  
+  /* 代码块 */
+  #content pre {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  #content pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85em;
+    color: #d4d4d4;
+  }
+  
+  /* 列表 */
+  #content ul,
+  #content ol {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+  
+  #content li {
+    margin-bottom: 0.4em;
+  }
+  
+  /* 引用块 */
+  #content blockquote {
+    border-left: 3px solid #667eea;
+    padding-left: 15px;
+    color: #bbb;
+    margin: 1em 0;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 15px;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  /* 链接 */
+  #content a {
+    color: #9fc;
+    text-decoration: underline;
+  }
+  
+  /* 图片 */
+  #content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  
+  /* 表格 */
+  #content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  #content th,
+  #content td {
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-align: left;
+  }
+  
+  #content th {
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    color: #fff;
+  }
+  
+  /* 水平线 */
+  #content hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 1.5em 0;
+  }
+  
+  /* 强调 */
+  #content strong {
+    color: #ff4646;
+    font-weight: 800;
+  }
+  
+  #content em {
+    color: #ccc;
+  }

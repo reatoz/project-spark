@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地图地块编号记录</title>
+  <meta name="description" content="星引擎地图编号顺序记录">
+  <link rel="stylesheet" href="/common.css">
+  <style>
+    .map-panel {
+      width: 100%;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
+    }
+
+    .map-tabs {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .map-tab {
+      background: transparent;
+      border: none;
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      font-weight: 500;
+      outline: none;
+    }
+
+    .map-tab:hover {
+      color: #333;
+    }
+
+    .map-tab.active {
+      color: #000;
+      border-bottom-color: #333;
+      font-weight: 600;
+    }
+
+    /* 地图显示区 */
+    .map-display {
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+    }
+
+    .map-wrapper {
+      box-sizing: border-box;
+    }
+
+    .map-grid {
+      gap: 0;
+    }
+
+    .map-grid .cell-active,
+    .map-grid .cell-empty {
+      box-sizing: border-box;
+      font-size: calc(var(--cell-size) * 0.4);
+      transition: background 0.2s;
+    }
+
+    svg.map-arrows {
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- 地图面板 -->
+  <div class="map-panel">
+    <!-- 切换条 -->
+    <div class="map-tabs" id="mapTabs">
+      <button class="map-tab active" data-mapname="星趴•梦想号">星趴•梦想号</button>
+      <button class="map-tab" data-mapname="御魂庆典">御魂庆典</button>
+      <button class="map-tab" data-mapname="水乡古镇">水乡古镇</button>
+      <button class="map-tab" data-mapname="龙宫游乐园">龙宫游乐园</button>
+    </div>
+    <!-- 地图渲染区 -->
+    <div class="map-display" id="mapDisplay"></div>
+  </div>
+
+  <footer class="map-footer" style="text-align:center; margin-top:30px; padding:15px; color:#666; font-size:13px;">
+    <a id="footer-wiki-link" href="https://wiki.biligame.com/starengine/星趴·梦想号" target="_blank">Wiki：星趴·梦想号</a>
+  </footer>
+
+  <script src="mapbuild.js"></script>
+  <script src="/js/nav.js"></script>
+</body>
+</html>

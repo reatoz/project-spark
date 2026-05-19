@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>公告详情</title>
+  <link rel="stylesheet" href="/common.css">
+  <link rel="stylesheet" href="/news/detail.css">
+  <style>
+    .detail-container {
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 20px;
+      color: #fff;
+    }
+    .detail-card {
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 30px;
+    }
+    .detail-card a { color: #9fc; }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #fff;
+      text-decoration: underline;
+    }
+    /* Markdown 渲染后的样式微调 */
+    .detail-card h1, .detail-card h2, .detail-card h3 {
+      margin-top: 1em;
+    }
+    .detail-card img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <main class="detail-container">
+    <div class="detail-card" id="content">
+      加载中...
+    </div>
+    <a href="/" class="back-link">← 返回首页</a>
+  </main>
+
+  <script src="/js/nav.js"></script>
+  <!-- 引入 marked.js 解析 Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    (async function() {
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get('file');
+      if (!file) {
+        document.getElementById('content').innerHTML = '<p>缺少文件参数</p>';
+        return;
+      }
+
+      try {
+        const resp = await fetch(file);
+        if (!resp.ok) throw new Error('文件加载失败');
+        const md = await resp.text();
+        let html = marked.parse(md);
+        html = html.replace(/<strong>([^<]*日期：[^<]*)<\/strong>/g, '<strong style="color:#aaa;">$1</strong>');
+        document.getElementById('content').innerHTML = html;
+        document.title = extractTitle(md) + ' - 公告';
+      } catch (err) {
+        document.getElementById('content').innerHTML = '<p>公告加载失败，请稍后重试。</p>';
+      }
+    })();
+
+    // 简单提取 Markdown 中的第一个 # 标题作为页面标题
+    function extractTitle(md) {
+      const match = md.match(/^#\s+(.+)/m);
+      return match ? match[1] : '公告详情';
+    }
+  </script>
+</body>
+</html>

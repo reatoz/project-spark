@@ -1131,7 +1131,7 @@
       margin-right: 8px;
       transition: 0.1s;
     }
-    
+
     .btn.secondary {
       background: #f0f0f0;
       border: 1px solid #aaa;
@@ -1147,8 +1147,7 @@
     }
 
     #save-img-btn,
-    #reset-btn,
-    #import-json-btn {
+    #reset-btn {
       margin-top: 8px;
     }
   </style>
@@ -1387,6 +1386,7 @@
     <div class="control-group top-switches" style="flex-direction: column; flex-wrap: nowrap; width: 100%; box-sizing: border-box;">
       <!-- 第一行：文件上传 -->
       <div class="control-group" style="flex-wrap: nowrap; margin-bottom: 10px;">
+        <button class="btn" id="import-json-btn" style="background: #FF9800;">导入数据</button>
         <label>角色立绘上传</label>
         <button class="btn" id="upload-avatar-btn">选择图片</button>
         <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
@@ -1505,7 +1505,6 @@
     <div class="control-group">
       <button class="btn" id="save-img-btn">保存图片</button>
       <button class="btn secondary" id="reset-btn">重置默认</button>
-      <button class="btn" id="import-json-btn" style="background: #FF9800;">导入数据</button>
     </div>
     <!-- 导入数据用的隐藏文件选择器 -->
     <input type="file" id="import-file-input" accept="image/*" style="display:none;">
@@ -1514,5 +1513,6 @@
 
 <script src="characterdiy.js"></script>
 <script src="/js/nav.js"></script>
+<script src="/js/update-log.js" data-log-url="character-diy-update-log.json"></script>
 </body></html>
   

@@ -1,0 +1,31 @@
+[
+  {
+    "title": "本站说明",
+    "date": "2026-05-13",
+    "summary": "关于本站的一些情况说明",
+    "type": "md",
+    "url": "/news/detail/2026-05-13-update.md",
+    "pinned": true
+  },
+  {
+    "title": "星趴地图编号记录",
+    "date": "2026-05-19",
+    "summary": "地图编号记录功能，仅为了记录解包后地块的编号和怪物在十字路口的优先方向",
+    "type": "html",
+    "url": "/project/astralpart/maplandnum/"
+  },
+  {
+    "title": "星趴卡牌制作器使用说明",
+    "date": "2026-05-13",
+    "summary": "星趴卡牌diy使用说明书",
+    "type": "md",
+    "url": "/news/detail/2026-05-13-carddiy.md"
+  },
+  {
+    "title": "星趴角色模拟器使用说明",
+    "date": "2026-05-13",
+    "summary": "角色diy使用说明书",
+    "type": "md",
+    "url": "/news/detail/2026-05-13-rolediy.md"
+  }
+]

@@ -38,7 +38,7 @@
     align-items: center;     
 }
 .Card00-box-box.effect {
-    top: 76px;               /* 效果类型图标专用位置微调 */
+    top: 76px;
 }
 .Card00-box-box.effect .Card00-box img {
     transform: translateY(-6.5px);
@@ -139,6 +139,33 @@
     z-index: -1;
 }
 
+/* ---- 卡图容器（新增）---- */
+#card-art-container {
+    position: absolute;
+    top: 18px;
+    left: 21px;
+    width: 320px;
+    height: 320px;
+    overflow: hidden;
+    border-radius: 15px;
+    z-index: 1;
+}
+#card-art-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform-origin: 0 0;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+#card-art-img.dragging {
+    cursor: grabbing;
+}
+
 /* ---- 编辑区样式 ---- */
 .edit-section {
     width: 400px;
@@ -223,6 +250,22 @@ select, input[type="text"] {
 .hidden {
     display: none;
 }
+
+/* buff 编辑区样式 */
+.custom-buff-area {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+.buff-preview-img {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    margin-left: 10px;
+    border-radius: 4px;
+    background: #1a1a1a;
+}
 </style>
 </head>
 <body>
@@ -234,7 +277,10 @@ select, input[type="text"] {
         <div class="hand-card Card" id="character-card-preview" style="font-family:'荆南波波黑'; ">
             <img src="https://patchwiki.biligame.com/images/starengine/8/88/r4ucxyldzbh5w8m2lmtal1zf5qgnp3n.png" width="362" height="530" style="display: block;">
             <img class="CardStar" src="https://patchwiki.biligame.com/images/starengine/6/6c/29ghqdw72g3zo7o190no2ye9si4mp56.png" width="32" height="32">
-            <div class="Card0" id="card-art-container" style="background-image: url('https://patchwiki.biligame.com/images/starengine/4/4b/0zckhmjtnnjk6zdp8vjuq2uzs2aiska.png'); background-size: cover; background-position: center; background-repeat: no-repeat; width: 320px; height: 320px; z-index: 1; border-radius: 15px; left: 21px; top: 18px;"></div>
+            <!-- 卡图容器改为 img 元素 -->
+            <div id="card-art-container">
+                <img id="card-art-img" src="https://patchwiki.biligame.com/images/starengine/4/4b/0zckhmjtnnjk6zdp8vjuq2uzs2aiska.png" alt="卡图">
+            </div>
             <div class="Card00-box-box" id="cost-icon-container" style="z-index: 3;"></div>
             <img class="Card0" id="type-icon-img" src="https://patchwiki.biligame.com/images/starengine/c/cf/6z6hm9wnd9gv9oh1wi6kvg86cn70rsj.png" width="56" height="56" style="left: 17px; z-index: 4;">
             <img class="Card1" id="type-bar-img" src="https://patchwiki.biligame.com/images/starengine/f/f4/2hyy1tf8wskoyo4vx29ma5tbi9xfh16.png" width="222" height="55" style="z-index: 3;">
@@ -252,6 +298,18 @@ select, input[type="text"] {
                 <button class="btn" id="upload-avatar-btn">选择图片</button>
                 <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
                 <p style="font-size:12px; color:#aaa;">上传后可使用鼠标滚轮缩放，左键拖拽调整位置</p>
+            </div>
+            <!-- 自定义 Buff 图标区域 -->
+            <div class="custom-buff-area">
+                <label>自定义 Buff 图标（上传新会覆盖旧的）</label>
+                <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center;">
+                    <input type="text" id="buff-name-input" placeholder="Buff 名称（如：火焰）" style="flex:1; background:#222; border:1px solid #555; color:#fff; padding:6px 8px; border-radius:6px;">
+                    <button class="btn" id="upload-buff-btn" style="background:#4a6a8a;">上传图片</button>
+                    <input type="file" id="buff-file-input" accept="image/*" style="display:none">
+                </div>
+                <div id="current-buff-preview" style="margin-top: 8px; font-size: 12px; color: #aaa;">
+                    当前自定义 Buff: 无
+                </div>
             </div>
             <div class="control-item">
                 <label>卡牌类型</label>
@@ -283,8 +341,9 @@ select, input[type="text"] {
                 <div class="text-input" contenteditable="true" id="input-card-name">攻击(中)</div>
             </div>
             <div class="control-group">
-                <label>内容描述</label>
-                <div class="textarea-input" contenteditable="true" id="input-card-desc">战斗中攻击方可用<br>攻击力+1~3</div>
+                <label>内容描述（支持 Buff: &#123;&#123;buff&#124;名称&#125;&#125;）</label>
+                <div class="textarea-input" contenteditable="true" id="input-card-desc">战斗中攻击方可用
+攻击力+1~3</div>
             </div>
             <div class="control-group">
                 <label>附录1</label>
@@ -307,12 +366,63 @@ select, input[type="text"] {
 </div>
    
 <script src="/js/nav.js"></script>
-<!-- 引入 modern-screenshot 最新版 -->
 <script src="https://unpkg.com/modern-screenshot@4.4.39/dist/index.js"></script>
 
 <script>
 (function() {
-    // ---------- 图片链接映射 ----------
+    // ==================== IndexedDB 工具 ====================
+    const DB_NAME = 'CardDiyDB';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'media';
+
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME);
+                }
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function saveToDB(key, value) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            store.put(value, key);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        });
+    }
+
+    async function loadFromDB(key) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.get(key);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function removeFromDB(key) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            store.delete(key);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        });
+    }
+
+    // ==================== 图片链接映射 ====================
     const IMAGES = {
         cardStar: 'https://patchwiki.biligame.com/images/starengine/6/6c/29ghqdw72g3zo7o190no2ye9si4mp56.png',
         cardFront: 'https://patchwiki.biligame.com/images/starengine/8/88/r4ucxyldzbh5w8m2lmtal1zf5qgnp3n.png',
@@ -349,8 +459,18 @@ select, input[type="text"] {
         }
     };
 
+    // ---------- Buff 预设 ----------
+    const PRESET_BUFFS = {
+        '星光': 'https://patchwiki.biligame.com/images/starengine/6/6e/hhw1vmxcumvwmphbn4s6tyyflzw53ux.png',
+        '治愈': 'https://patchwiki.biligame.com/images/starengine/5/5d/9q3ftlvbeap421y13v34hp4z3z0qqw1.png',
+        '标记': 'https://patchwiki.biligame.com/images/starengine/1/1e/af5wv8bvxummzy8ep35s9ytjvsigqbj.png'
+    };
+
+    // ---------- localStorage 键名 ----------
+    const STORAGE_KEY = 'CardDiyTool_data';
+
     // ---------- DOM 元素 ----------
-    const cardArt = document.getElementById('card-art-container');
+    const cardArtImg = document.getElementById('card-art-img');
     const costContainer = document.getElementById('cost-icon-container');
     const typeIconImg = document.getElementById('type-icon-img');
     const typeBarImg = document.getElementById('type-bar-img');
@@ -373,116 +493,177 @@ select, input[type="text"] {
     const resetBtn = document.getElementById('reset-btn');
     const saveBtn = document.getElementById('save-img-btn');
 
-    // 图片拖拽缩放状态
+    // Buff 相关 DOM
+    const buffNameInput = document.getElementById('buff-name-input');
+    const uploadBuffBtn = document.getElementById('upload-buff-btn');
+    const buffFileInput = document.getElementById('buff-file-input');
+    const currentBuffPreview = document.getElementById('current-buff-preview');
+
+    // ---------- 拖拽缩放状态（像素单位）----------
+    let translateX = 0;
+    let translateY = 0;
     let scale = 1;
-    let posX = 50;
-    let posY = 50;
     let isDragging = false;
-    let startX, startY, startPosX, startPosY;
+    let startX, startY, startTranslateX, startTranslateY;
 
-    // ---------- localStorage 键名 ----------
-    const STORAGE_KEY = 'CardDiyTool_data';
+    // 自定义 buff 状态
+    let currentCustomBuff = null;
 
-    // ----------收集当前卡牌数据（不含图片）----------
-    function getCardData() {
-        return {
-            version: 1,
-            type: typeSelect.value,
-            cost: parseInt(costInput.value, 10) || 1,
-            effectTarget: effectSelect.value,
-            cardName: inputCardName.innerText.trim(),
-            cardDesc: inputCardDesc.innerHTML.trim(),
-            appendix1: inputAppendix1.innerText.trim(),
-            appendix2: inputAppendix2.innerText.trim(),
-            transform: {
-                scale: scale,
-                posX: posX,
-                posY: posY
+    // ==================== 卡图拖拽缩放 ====================
+    function initImageControls() {
+        if (!cardArtImg) return;
+
+        cardArtImg.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            cardArtImg.classList.add('dragging');
+            startX = e.clientX;
+            startY = e.clientY;
+            startTranslateX = translateX;
+            startTranslateY = translateY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            translateX = startTranslateX + (e.clientX - startX);
+            translateY = startTranslateY + (e.clientY - startY);
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                cardArtImg.classList.remove('dragging');
             }
-        };
+        });
+
+        cardArtImg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            scale = Math.min(3, Math.max(0.3, scale + delta));
+            updateTransform();
+        });
+
+        cardArtImg.addEventListener('dragstart', (e) => e.preventDefault());
     }
 
-    // ---------- 保存当前状态到 localStorage ----------
-    function saveToLocalStorage() {
+    function updateTransform() {
+        if (!cardArtImg) return;
+        cardArtImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+
+    function resetImageTransform() {
+        translateX = 0; translateY = 0; scale = 1;
+        updateTransform();
+    }
+
+    // ==================== 文本保存到 localStorage（不含图片）====================
+    function saveTextData() {
         const data = {
             type: typeSelect.value,
             cost: costInput.value,
             effectTarget: effectSelect.value,
             cardName: inputCardName.innerText,
-            cardDesc: inputCardDesc.innerHTML,
+            cardDesc: inputCardDesc.innerText,
             appendix1: inputAppendix1.innerText,
-            appendix2: inputAppendix2.innerText,
-            cardArtUrl: cardArt.style.backgroundImage !== 'none' ? cardArt.style.backgroundImage : '',
-            scale: scale,
-            posX: posX,
-            posY: posY
+            appendix2: inputAppendix2.innerText
         };
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        } catch (e) {
-            console.warn('保存到 localStorage 失败', e);
-        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
-    // ---------- 从 localStorage 加载状态 ----------
-    function loadFromLocalStorage() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return false;
-        try {
-            const data = JSON.parse(saved);
-            typeSelect.value = data.type || 'Attack';
-            costInput.value = data.cost || 2;
-            effectSelect.value = data.effectTarget || 'none';
-            inputCardName.innerText = data.cardName || '攻击(中)';
-            inputCardDesc.innerHTML = data.cardDesc || '战斗中攻击方可用<br>攻击力+1~3';
-            inputAppendix1.innerText = data.appendix1 || 'CARD-001';
-            inputAppendix2.innerText = data.appendix2 || '一切的恐惧源于火力不足';
-            if (data.cardArtUrl && data.cardArtUrl !== 'none') {
-                cardArt.style.backgroundImage = data.cardArtUrl;
-            } else {
-                cardArt.style.backgroundImage = `url('${IMAGES.defaultCardArt}')`;
+    // ==================== 数据加载 ====================
+    async function loadAllData() {
+        // 1. 从 localStorage 加载文本
+        const savedText = localStorage.getItem(STORAGE_KEY);
+        if (savedText) {
+            try {
+                const data = JSON.parse(savedText);
+                typeSelect.value = data.type || 'Attack';
+                costInput.value = data.cost || 2;
+                effectSelect.value = data.effectTarget || 'none';
+                inputCardName.innerText = data.cardName || '攻击(中)';
+                inputCardDesc.innerText = data.cardDesc || '战斗中攻击方可用\n攻击力+1~3';
+                inputAppendix1.innerText = data.appendix1 || 'CARD-001';
+                inputAppendix2.innerText = data.appendix2 || '一切的恐惧源于火力不足';
+            } catch (e) {
+                console.warn('读取文本数据失败', e);
+                setDefaultText();
             }
-            scale = data.scale !== undefined ? data.scale : 1;
-            posX = data.posX !== undefined ? data.posX : 50;
-            posY = data.posY !== undefined ? data.posY : 50;
-            cardArt.style.backgroundSize = `${scale * 100}%`;
-            cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
-            toggleControlsByType();
-            updateTypeVisuals();
-            updateCostIcons();
-            updateTexts();
-            return true;
-        } catch (e) {
-            console.warn('读取 localStorage 失败', e);
-            return false;
+        } else {
+            setDefaultText();
         }
-    }
 
-    // ---------- 重置所有数据 ----------
-    function resetToDefault() {
-        localStorage.removeItem(STORAGE_KEY);
-        typeSelect.value = 'Attack';
-        costInput.value = 2;
-        effectSelect.value = 'none';
-        inputCardName.innerText = '攻击(中)';
-        inputCardDesc.innerHTML = '战斗中攻击方可用<br>攻击力+1~3';
-        inputAppendix1.innerText = 'CARD-001';
-        inputAppendix2.innerText = '一切的恐惧源于火力不足';
-        cardArt.style.backgroundImage = `url('${IMAGES.defaultCardArt}')`;
-        cardArt.style.backgroundColor = 'transparent';
-        scale = 1;
-        posX = 50;
-        posY = 50;
-        cardArt.style.backgroundSize = 'cover';
-        cardArt.style.backgroundPosition = 'center';
+        // 2. 从 IndexedDB 加载图片
+        try {
+            const savedArt = await loadFromDB('cardArt');
+            if (savedArt && savedArt.dataURL) {
+                cardArtImg.src = savedArt.dataURL;
+                // 恢复变换状态
+                if (savedArt.transform) {
+                    translateX = savedArt.transform.translateX || 0;
+                    translateY = savedArt.transform.translateY || 0;
+                    scale = savedArt.transform.scale || 1;
+                } else {
+                    resetImageTransform();
+                }
+            } else {
+                cardArtImg.src = IMAGES.defaultCardArt;
+                resetImageTransform();
+            }
+        } catch (e) {
+            console.warn('读取卡图失败', e);
+            cardArtImg.src = IMAGES.defaultCardArt;
+            resetImageTransform();
+        }
+
+        // 3. 从 IndexedDB 加载自定义 buff
+        try {
+            const buffData = await loadFromDB('customBuff');
+            if (buffData && buffData.name && buffData.dataURL) {
+                currentCustomBuff = buffData;
+            } else {
+                currentCustomBuff = null;
+            }
+        } catch (e) {
+            currentCustomBuff = null;
+        }
+        updateBuffPreviewUI();
+
         toggleControlsByType();
         updateTypeVisuals();
         updateCostIcons();
         updateTexts();
-        saveToLocalStorage();
     }
 
-    // ---------- 辅助函数：更新费用/效果图标 ----------
+    function setDefaultText() {
+        typeSelect.value = 'Attack';
+        costInput.value = 2;
+        effectSelect.value = 'none';
+        inputCardName.innerText = '攻击(中)';
+        inputCardDesc.innerText = '战斗中攻击方可用\n攻击力+1~3';
+        inputAppendix1.innerText = 'CARD-001';
+        inputAppendix2.innerText = '一切的恐惧源于火力不足';
+    }
+
+    // ==================== 重置 ====================
+    async function resetToDefault() {
+        localStorage.removeItem(STORAGE_KEY);
+        await removeFromDB('cardArt');
+        await removeFromDB('customBuff');
+        setDefaultText();
+        cardArtImg.src = IMAGES.defaultCardArt;
+        resetImageTransform();
+        currentCustomBuff = null;
+        buffNameInput.value = '';
+        updateBuffPreviewUI();
+        toggleControlsByType();
+        updateTypeVisuals();
+        updateCostIcons();
+        updateTexts();
+    }
+
+    // ==================== 费用 / 类型 ====================
     function updateCostIcons() {
         const type = typeSelect.value;
         const cost = parseInt(costInput.value, 10) || 1;
@@ -492,322 +673,125 @@ select, input[type="text"] {
         if (type === 'Attack' || type === 'Defend') {
             const iconType = type === 'Attack' ? 'Attack' : 'Defend';
             for (let i = 0; i < cost; i++) {
-                html += `
-                    <div class="Card00-box">
-                        <img src="${IMAGES.card00.box}" width="32" height="32">
-                        <div class="Card00">
-                            <img src="${IMAGES.card00[iconType]}" width="20" height="20">
-                        </div>
-                    </div>
-                `;
+                html += `<div class="Card00-box">
+                    <img src="${IMAGES.card00.box}" width="32" height="32">
+                    <div class="Card00"><img src="${IMAGES.card00[iconType]}" width="20" height="20"></div>
+                </div>`;
             }
         } else if (type === 'Effect') {
             const effectImg = IMAGES.card00.Effect[target] || IMAGES.card00.Effect.none;
-            html = `
-                <div class="Card00-box">
-                    <img src="${effectImg}" style="width: 40px; height: auto;">
-                </div>
-            `;
+            html = `<div class="Card00-box"><img src="${effectImg}" style="width: 40px; height: auto;"></div>`;
         }
         costContainer.innerHTML = html;
-        saveToLocalStorage();
+        saveTextData();
     }
 
     function updateTypeVisuals() {
         const type = typeSelect.value;
         typeIconImg.src = IMAGES.card0[type] || IMAGES.card0.Attack;
         typeBarImg.src = IMAGES.card1[type] || IMAGES.card1.Attack;
-        if (type === 'Effect') {
-            costContainer.classList.add('effect');
-        } else {
-            costContainer.classList.remove('effect');
+        costContainer.classList.toggle('effect', type === 'Effect');
+        saveTextData();
+    }
+
+    // ==================== Buff 解析 ====================
+    function escapeHtml(unsafe) {
+        return unsafe.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m] || m);
+    }
+
+    function parseDescription(text, buffMap) {
+        if (!text) return '';
+        let temp = text.replace(/&nbsp;/g, '{{nbsp}}').replace(/&emsp;/g, '{{emsp}}').replace(/&ensp;/g, '{{ensp}}');
+        const buffRegex = /\{\{buff\|([^}]+)\}\}/g;
+        let result = '';
+        let lastIdx = 0, match;
+        while ((match = buffRegex.exec(temp)) !== null) {
+            result += escapeHtml(temp.substring(lastIdx, match.index));
+            const iconUrl = buffMap[match[1]];
+            result += iconUrl ? `<img src="${escapeHtml(iconUrl)}" style="width:26px;height:26px;vertical-align:-6px;display:inline-block;border-radius:4px;">` : `{{buff|${escapeHtml(match[1])}}}`;
+            lastIdx = buffRegex.lastIndex;
         }
-        saveToLocalStorage();
+        result += escapeHtml(temp.substring(lastIdx));
+        result = result.replace(/{{nbsp}}/g, '&nbsp;').replace(/{{emsp}}/g, '&emsp;').replace(/{{ensp}}/g, '&ensp;');
+        return result.replace(/\n/g, '<br>');
+    }
+
+    function getFullBuffMap() {
+        const map = { ...PRESET_BUFFS };
+        if (currentCustomBuff?.name && currentCustomBuff?.dataURL) map[currentCustomBuff.name] = currentCustomBuff.dataURL;
+        return map;
     }
 
     function updateTexts() {
         cardNameDisplay.innerText = inputCardName.innerText.trim() || '';
-        cardDescDisplay.innerHTML = inputCardDesc.innerHTML.trim() || '';
+        cardDescDisplay.innerHTML = parseDescription(inputCardDesc.innerText, getFullBuffMap());
         appendix1Display.innerText = inputAppendix1.innerText.trim() || '';
         appendix2Display.innerText = inputAppendix2.innerText.trim() || '';
-        saveToLocalStorage();
+        saveTextData();
     }
 
     function toggleControlsByType() {
         const type = typeSelect.value;
-        if (type === 'Attack' || type === 'Defend') {
-            costControl.classList.remove('hidden');
-            effectControl.classList.add('hidden');
-        } else if (type === 'Effect') {
-            costControl.classList.add('hidden');
-            effectControl.classList.remove('hidden');
+        costControl.classList.toggle('hidden', type !== 'Attack' && type !== 'Defend');
+        effectControl.classList.toggle('hidden', type !== 'Effect');
+        saveTextData();
+    }
+
+    // ==================== Buff UI ====================
+    function updateBuffPreviewUI() {
+        if (currentCustomBuff?.name && currentCustomBuff?.dataURL) {
+            currentBuffPreview.innerHTML = `当前自定义 Buff: ${escapeHtml(currentCustomBuff.name)} <img src="${escapeHtml(currentCustomBuff.dataURL)}" class="buff-preview-img">`;
+            buffNameInput.value = currentCustomBuff.name;
         } else {
-            costControl.classList.add('hidden');
-            effectControl.classList.add('hidden');
+            currentBuffPreview.innerHTML = '当前自定义 Buff: 无';
+            buffNameInput.value = '';
         }
-        saveToLocalStorage();
     }
 
-    // ---------- 图片上传及缩放拖拽功能 ----------
-    function initImageControls() {
-        uploadBtn.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    cardArt.style.backgroundImage = `url('${event.target.result}')`;
-                    cardArt.style.backgroundColor = 'transparent';
-                    // 检查是否有导入流程传来的变换参数
-                    if (window._pendingTransform) {
-                        scale = window._pendingTransform.scale ?? 1;
-                        posX = window._pendingTransform.posX ?? 50;
-                        posY = window._pendingTransform.posY ?? 50;
-                        cardArt.style.backgroundSize = `${scale * 100}%`;
-                        cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
-                        delete window._pendingTransform; // 用完清除
-                    } else {
-                        // 正常手动上传：恢复默认缩放位置
-                        scale = 1;
-                        posX = 50;
-                        posY = 50;
-                        cardArt.style.backgroundSize = 'cover';
-                        cardArt.style.backgroundPosition = 'center';
-                    }
-                    saveToLocalStorage();
-                };
-                reader.readAsDataURL(file);
-            }
-            fileInput.value = '';
-        });
-
-        cardArt.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (!cardArt.style.backgroundImage || cardArt.style.backgroundImage === 'none') return;
-            const delta = e.deltaY > 0 ? -0.1 : 0.1;
-            scale = Math.min(3, Math.max(0.5, scale + delta));
-            cardArt.style.backgroundSize = `${scale * 100}%`;
-            saveToLocalStorage();
-        });
-
-        cardArt.addEventListener('mousedown', (e) => {
-            if (!cardArt.style.backgroundImage || cardArt.style.backgroundImage === 'none') return;
-            e.preventDefault();
-            isDragging = true;
-            cardArt.classList.add('dragging');
-            startX = e.clientX;
-            startY = e.clientY;
-            const pos = window.getComputedStyle(cardArt).backgroundPosition.split(' ');
-            startPosX = parseFloat(pos[0]) || 50;
-            startPosY = parseFloat(pos[1]) || 50;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            const rect = cardArt.getBoundingClientRect();
-            const moveX = (dx / rect.width) * 100;
-            const moveY = (dy / rect.height) * 100;
-            posX = Math.min(100, Math.max(0, startPosX - moveX));
-            posY = Math.min(100, Math.max(0, startPosY - moveY));
-            cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
-            saveToLocalStorage();
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                cardArt.classList.remove('dragging');
-            }
-        });
+    async function uploadCustomBuff(file, buffName) {
+        if (!buffName?.trim()) { alert('请输入 Buff 名称'); return; }
+        const name = buffName.trim();
+        if (PRESET_BUFFS.hasOwnProperty(name)) { alert(`"${name}" 是预设 Buff，不可覆盖。`); return; }
+        if (!file?.type.startsWith('image/')) { alert('请选择有效的图片文件'); return; }
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            currentCustomBuff = { name, dataURL: e.target.result };
+            updateBuffPreviewUI();
+            updateTexts();
+            await saveToDB('customBuff', currentCustomBuff);
+        };
+        reader.readAsDataURL(file);
     }
 
-    // ==================== 使用 FontFace API 手动预加载所有字体分片 ====================
-    let fontLoadPromise = null;
-
-    async function loadAndRegisterFonts() {
-        if (fontLoadPromise) return fontLoadPromise;
-
-        fontLoadPromise = (async () => {
-            try {
-                // 1. 获取字体分片 URL 列表
-                const cssUrl = 'https://fontsapi.zeoseven.com/298/main/result.css';
-                const response = await fetch(cssUrl);
-                const cssText = await response.text();
-                const regex = /url\(['"]?(\.\/[^'"\)]+\.woff2)['"]?\)/g;
-                let match;
-                const baseUrl = 'https://fontsapi.zeoseven.com/298/main/';
-                const fontUrls = [];
-                while ((match = regex.exec(cssText)) !== null) {
-                    const relativePath = match[1];
-                    const fullUrl = baseUrl + relativePath.slice(2);
-                    fontUrls.push(fullUrl);
-                }
-                const uniqueFontUrls = [...new Set(fontUrls)];
-                console.log(`📦 发现 ${uniqueFontUrls.length} 个字体分片，开始加载...`);
-
-                // 2. 使用 FontFace 逐个加载并注册
-                const loadPromises = uniqueFontUrls.map(url => {
-                    return new Promise((resolve) => {
-                        const font = new FontFace('荆南波波黑', `url(${url})`, {
-                            weight: '700',
-                            style: 'normal'
-                        });
-                        font.load().then(loadedFont => {
-                            document.fonts.add(loadedFont);
-                            console.log(`✅ 字体加载成功: ${url.split('/').pop()}`);
-                            resolve(true);
-                        }).catch(err => {
-                            console.warn(`⚠️ 字体加载失败: ${url}`, err);
-                            resolve(false);
-                        });
-                    });
-                });
-
-                await Promise.all(loadPromises);
-                console.log(`🎉 所有字体分片处理完成，共注册 ${uniqueFontUrls.length} 个`);
-                await document.fonts.ready;
-
-                // ========== 测试打印 ==========
-                console.log('字体状态:', document.fonts.check('12px "荆南波波黑"') ? '✅ 可用' : '❌ 不可用');
-                
-            } catch (err) {
-                console.error('❌ 字体预加载失败:', err);
+    // ==================== 卡图上传 ====================
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file?.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            cardArtImg.src = ev.target.result;
+            if (window._pendingTransform) {
+                translateX = window._pendingTransform.translateX || 0;
+                translateY = window._pendingTransform.translateY || 0;
+                scale = window._pendingTransform.scale || 1;
+                delete window._pendingTransform;
+            } else {
+                resetImageTransform();
             }
-        })();
-
-        return fontLoadPromise;
-    }
-
-    // 立即开始预加载
-    loadAndRegisterFonts();
-
-    // ---------- 截图功能（使用 modern-screenshot）----------
-    function setupScreenshot() {
-        if (!saveBtn) return;
-        const cardPreview = document.getElementById('character-card-preview');
-        if (!cardPreview) return;
-
-        // ---------- 提取导出 JSON 功能 ----------
-        function triggerJsonDownload() {
-            const data = getCardData();
-            const jsonStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            const fileName = `${data.cardName || '卡牌'}.json`;
-            a.download = fileName;
-            a.href = url;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        saveBtn.addEventListener('click', async function() {
-            // --- 弹窗询问是否同时导出数据 ---
-            const shouldExportData = confirm('是否导出数据？');
-            if (shouldExportData) {
-                triggerJsonDownload();   // 先下载 JSON
-            }
-            // 无论是否导出数据，都会继续保存图片
-            const currentBtn = this;
-            const type = typeSelect.value;
-            let cardName = (inputCardName.innerText || '').trim();
-            if (!cardName) cardName = '未命名';
-            cardName = cardName.replace(/[\\/:*?"<>|\r\n]/g, '_');
-            const typeMap = {
-                Attack: '攻击卡',
-                Defend: '防御卡',
-                Effect: '效果卡',
-                Counter: '反制卡',
-                ji: '好运卡',
-                xiong: '霉运卡',
-                Event: '事件卡',
-                curse: '诅咒卡'
-            };
-            const typeDisplay = typeMap[type] || type;
-            const fileName = `卡片_${typeDisplay}_${cardName}`;
-
-            currentBtn.innerText = "生成中...";
-            currentBtn.disabled = true;
-
-            // 等待所有图片加载完成
-            const images = cardPreview.getElementsByTagName('img');
-            const imagePromises = Array.from(images).map(img => {
-                if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-                return new Promise((resolve) => {
-                    img.onload = resolve;
-                    img.onerror = () => {
-                        console.warn('图片加载失败，继续截图:', img.src);
-                        resolve();
-                    };
-                });
+            updateTransform();
+            // 保存到 IndexedDB（含变换状态）
+            await saveToDB('cardArt', {
+                dataURL: ev.target.result,
+                transform: { translateX, translateY, scale }
             });
-
-            // 等待背景图加载
-            let bgPromise = Promise.resolve();
-            if (cardArt.style.backgroundImage && cardArt.style.backgroundImage !== 'none') {
-                const bgUrl = cardArt.style.backgroundImage.slice(5, -2);
-                if (bgUrl) {
-                    bgPromise = new Promise((resolve) => {
-                        const bgImg = new Image();
-                        bgImg.onload = resolve;
-                        bgImg.onerror = resolve;
-                        bgImg.src = bgUrl;
-                    });
-                }
-            }
-
-            try {
-                await Promise.all([...imagePromises, bgPromise]);
-                await loadAndRegisterFonts();
-                await document.fonts.ready;
-                cardPreview.offsetHeight;
-
-                if (typeof window.modernScreenshot === 'undefined') {
-                    throw new Error('modern-screenshot 库未加载，请检查网络或刷新页面重试');
-                }
-
-                const dpr = window.devicePixelRatio || 1;
-                const optimalScale = Math.min(4, Math.max(2, dpr * 1.5));
-
-                // 固定卡片尺寸，防止截图裁剪
-                const width = 362;
-                const height = 530;
-
-                const dataUrl = await window.modernScreenshot.domToPng(cardPreview, {
-                    scale: optimalScale,
-                    backgroundColor: null,
-                    width: width,
-                    height: height,
-                    style: {
-                        overflow: 'visible'   // 确保内容不被裁剪
-                    }
-                });
-
-                const link = document.createElement('a');
-                link.download = `${fileName}.png`;
-                link.href = dataUrl;
-                link.click();
-
-            } catch (err) {
-                console.error('截图失败:', err);
-                alert('截图失败：' + err.message);
-            } finally {
-                currentBtn.innerText = "保存图片";
-                currentBtn.disabled = false;
-            }
-        });
-    }
-
-    // ---------- 事件绑定 ----------
-    typeSelect.addEventListener('change', () => {
-        toggleControlsByType();
-        updateTypeVisuals();
-        updateCostIcons();
+        };
+        reader.readAsDataURL(file);
+        fileInput.value = '';
     });
+
+    // ==================== 事件绑定 ====================
+    typeSelect.addEventListener('change', () => { toggleControlsByType(); updateTypeVisuals(); updateCostIcons(); });
     costInput.addEventListener('input', () => {
         let val = parseInt(costInput.value, 10);
         if (isNaN(val) || val < 1) costInput.value = 1;
@@ -819,110 +803,160 @@ select, input[type="text"] {
     inputCardDesc.addEventListener('input', updateTexts);
     inputAppendix1.addEventListener('input', updateTexts);
     inputAppendix2.addEventListener('input', updateTexts);
-    resetBtn.addEventListener('click', resetToDefault);
 
-    // 初始化：加载本地存储或保存默认
-    if (!loadFromLocalStorage()) {
-        saveToLocalStorage();
-    } else {
-        cardArt.style.backgroundSize = `${scale * 100}%`;
-        cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
+    resetBtn.addEventListener('click', async () => {
+        if (confirm('确定要重置所有内容吗？')) await resetToDefault();
+    });
+
+    uploadBuffBtn.addEventListener('click', () => {
+        if (!buffNameInput.value.trim()) { alert('请先输入 Buff 名称'); return; }
+        buffFileInput.click();
+    });
+    buffFileInput.addEventListener('change', (e) => {
+        if (e.target.files[0]) uploadCustomBuff(e.target.files[0], buffNameInput.value.trim());
+        buffFileInput.value = '';
+    });
+
+    // ==================== 字体 ====================
+    let fontLoadPromise = null;
+    async function loadAndRegisterFonts() {
+        if (fontLoadPromise) return fontLoadPromise;
+        fontLoadPromise = (async () => {
+            const cssUrl = 'https://fontsapi.zeoseven.com/298/main/result.css';
+            const resp = await fetch(cssUrl);
+            const cssText = await resp.text();
+            const regex = /url\(['"]?(\.\/[^'"\)]+\.woff2)['"]?\)/g;
+            const base = 'https://fontsapi.zeoseven.com/298/main/';
+            const urls = [...new Set([...cssText.matchAll(regex)].map(m => base + m[1].slice(2)))];
+            await Promise.all(urls.map(url => {
+                const font = new FontFace('荆南波波黑', `url(${url})`, { weight: '700', style: 'normal' });
+                return font.load().then(f => document.fonts.add(f)).catch(() => {});
+            }));
+            await document.fonts.ready;
+        })();
+        return fontLoadPromise;
     }
+    loadAndRegisterFonts();
 
-    initImageControls();
-    setupScreenshot();
-
-    // ---------- 导出 / 导入 ----------
-    const exportJsonBtn = document.getElementById('export-json-btn');
-    const importJsonBtn = document.getElementById('import-json-btn');
-
-    // 导出功能
-    exportJsonBtn.addEventListener('click', () => {
-        const data = getCardData();
-        const jsonStr = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const fileName = `${data.cardName || '卡牌'}.json`;
-        a.download = fileName;
-        a.href = url;
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
-    // 导入功能
-    const importFileInput = document.getElementById('import-file-input');
-    const importImageFileInput = document.getElementById('import-image-file-input');
-
-    // 导入按钮点击 -> 打开文件选择
-    importJsonBtn.addEventListener('click', () => {
-        importFileInput.click();
-    });
-
-    // 文件选择后读取并校验 JSON
-    importFileInput.addEventListener('change', () => {
-    const file = importFileInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        // ---------- 1. 解析与校验 ----------
-        let data;
-        try {
-            data = JSON.parse(e.target.result);
-            if (!data.type || data.cardName === undefined) {
-                throw new Error('缺少必要字段（type 或 cardName）');
-            }
-        } catch (err) {
-            alert('导入失败：' + err.message);
-            importFileInput.value = '';
-            return;
+    // ==================== 截图 ====================
+    saveBtn.addEventListener('click', async function() {
+        if (confirm('是否导出数据？')) {
+            const exportData = getExportData();
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.download = `${exportData.cardName || '卡牌'}.json`;
+            a.href = URL.createObjectURL(blob);
+            a.click();
+            URL.revokeObjectURL(a.href);
         }
 
-        // ---------- 2. 应用数据（不改变当前卡图） ----------
-        function applyCardData(parsedData) {
-            typeSelect.value = parsedData.type || 'Attack';
-            costInput.value = parsedData.cost || 2;
-            effectSelect.value = parsedData.effectTarget || 'none';
-            inputCardName.innerText = parsedData.cardName || '';
-            inputCardDesc.innerHTML = parsedData.cardDesc || '';
-            inputAppendix1.innerText = parsedData.appendix1 || '';
-            inputAppendix2.innerText = parsedData.appendix2 || '';
-
-            if (parsedData.transform) {
-                scale = parsedData.transform.scale ?? 1;
-                posX = parsedData.transform.posX ?? 50;
-                posY = parsedData.transform.posY ?? 50;
-                cardArt.style.backgroundSize = `${scale * 100}%`;
-                cardArt.style.backgroundPosition = `${posX}% ${posY}%`;
+        const btn = this;
+        btn.innerText = '生成中...';
+        btn.disabled = true;
+        const preview = document.getElementById('character-card-preview');
+        try {
+            const imgs = [...preview.getElementsByTagName('img')];
+            await Promise.all(imgs.map(img => img.complete && img.naturalHeight ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })));
+            if (cardArtImg.src && cardArtImg.complete && cardArtImg.naturalWidth === 0) {
+                await new Promise(r => { cardArtImg.onload = r; cardArtImg.onerror = r; });
             }
+            await loadAndRegisterFonts();
+            await document.fonts.ready;
+            preview.offsetHeight;
+            const dataUrl = await window.modernScreenshot.domToPng(preview, {
+                scale: Math.min(4, Math.max(2, (devicePixelRatio || 1) * 1.5)),
+                backgroundColor: null,
+                width: 362, height: 530,
+                style: { overflow: 'visible' }
+            });
+            const link = document.createElement('a');
+            const typeMap = { Attack:'攻击卡', Defend:'防御卡', Effect:'效果卡', Counter:'反制卡', ji:'好运卡', xiong:'霉运卡', Event:'事件卡', curse:'诅咒卡' };
+            const cardName = (inputCardName.innerText.trim() || '未命名').replace(/[\\/:*?"<>|\r\n]/g, '_');
+            link.download = `卡片_${typeMap[typeSelect.value] || typeSelect.value}_${cardName}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch (err) {
+            alert('截图失败：' + err.message);
+        } finally {
+            btn.innerText = '保存图片';
+            btn.disabled = false;
+        }
+    });
 
+    // ==================== 导出 / 导入 ====================
+    function getExportData() {
+        return {
+            version: 1,
+            type: typeSelect.value,
+            cost: parseInt(costInput.value, 10) || 1,
+            effectTarget: effectSelect.value,
+            cardName: inputCardName.innerText.trim(),
+            cardDesc: inputCardDesc.innerText.trim(),
+            appendix1: inputAppendix1.innerText.trim(),
+            appendix2: inputAppendix2.innerText.trim(),
+            transform: { translateX, translateY, scale }
+        };
+    }
+
+    document.getElementById('export-json-btn').addEventListener('click', () => {
+        const data = getExportData();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.download = `${data.cardName || '卡牌'}.json`;
+        a.href = URL.createObjectURL(blob);
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+
+    const importFileInput = document.getElementById('import-file-input');
+    document.getElementById('import-json-btn').addEventListener('click', () => importFileInput.click());
+
+    importFileInput.addEventListener('change', async () => {
+        const file = importFileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            let data;
+            try {
+                data = JSON.parse(e.target.result);
+                if (!data.type || data.cardName === undefined) throw new Error('缺少必要字段');
+            } catch (err) {
+                alert('导入失败：' + err.message);
+                importFileInput.value = '';
+                return;
+            }
+            typeSelect.value = data.type || 'Attack';
+            costInput.value = data.cost || 2;
+            effectSelect.value = data.effectTarget || 'none';
+            inputCardName.innerText = data.cardName || '';
+            inputCardDesc.innerText = data.cardDesc || '';
+            inputAppendix1.innerText = data.appendix1 || '';
+            inputAppendix2.innerText = data.appendix2 || '';
+            if (data.transform) {
+                translateX = data.transform.translateX || 0;
+                translateY = data.transform.translateY || 0;
+                scale = data.transform.scale || 1;
+                updateTransform();
+            }
             toggleControlsByType();
             updateTypeVisuals();
             updateCostIcons();
             updateTexts();
-            saveToLocalStorage();
-        }
 
-        applyCardData(data);
-
-        // ---------- 3. 询问是否更换卡图 ----------
-        const wantChangeImage = confirm('数据已加载。是否需要更换卡图？');
-        if (wantChangeImage) {
-            // 暂存变换数据，让已有上传逻辑完成后应用
-            window._pendingTransform = data.transform || null;
-            // 触发已有的“选择图片”按钮对应的 file input
-            const avatarInput = document.getElementById('avatar-file-input');
-            if (avatarInput) {
-                avatarInput.click();
+            if (confirm('数据已加载。是否更换卡图？')) {
+                window._pendingTransform = { translateX, translateY, scale };
+                fileInput.click();
             }
-        }
+            importFileInput.value = '';
+        };
+        reader.readAsText(file);
+    });
 
-        importFileInput.value = '';
-    };
-    reader.readAsText(file);
-});
+    // ==================== 启动 ====================
+    initImageControls();
+    loadAllData();
 })();
 </script>
 <script src="/js/nav.js"></script>
+<script src="/js/update-log.js" data-log-url="card-diy-update-log.json"></script>
 </body></html>
