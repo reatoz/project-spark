@@ -99,7 +99,7 @@
 
     buildGrid() {
       const content = this.data.content || {};
-      // 创建二维数组存储每个格子的数字（0 表示空）
+      // 创建二维数组存储每个格子的数字
       const gridValues = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
       for (let r = 1; r <= this.rows; r++) {
         for (let c = 1; c <= this.cols; c++) {
@@ -155,6 +155,7 @@
         }
       }
 
+      this.rectangles = rectangles;   
       // 根据矩形创建 DOM 元素
       this.gridEl.innerHTML = '';
       // 清空矩形映射
@@ -193,7 +194,6 @@
         }
       }
 
-      // 对于空单元格，还需要生成占位 div（保持网格结构）
       // 遍历所有格子，如果不在矩形中，生成空 div
       for (let r = 1; r <= this.rows; r++) {
         for (let c = 1; c <= this.cols; c++) {
@@ -212,20 +212,21 @@
 
     // 根据原始坐标获取小格子中心像素坐标
     getCellCenter(col, row) {
-      // 如果有合并矩形，则使用原始格子自己的中心
       const coord = `${String.fromCharCode(64 + col)}${row}`;
       if (this.cellRectMap[coord]) {
-        // 直接计算该原始格子的中心（不受矩形影响）
         const x = (col - 0.5) * this.cellSize;
         const y = (row - 0.5) * this.cellSize;
         return { x, y };
       } else {
-        // 未定义内容的格子，理论上不应该有箭头指向，但仍可计算
         return {
           x: (col - 0.5) * this.cellSize,
           y: (row - 0.5) * this.cellSize
         };
       }
+    }
+
+    getCellCount() {
+      return this.rectangles ? this.rectangles.length : 0;
     }
 
     buildArrows() {
@@ -273,7 +274,6 @@
 
       for (const def of this.arrowDefs) {
         const { color, fromCol, fromRow, toCol, toRow } = def;
-        // 使用原始坐标的中心点
         const fromCenter = this.getCellCenter(fromCol, fromRow);
         const toCenter = this.getCellCenter(toCol, toRow);
 
@@ -377,16 +377,8 @@
     displayArea.innerHTML = '';
 
     async function loadAndShowMap(mapname, button) {
-      if (mapInstances.has(mapname)) {
-        const { wrapper, renderer } = mapInstances.get(mapname);
-        for (const [, instance] of mapInstances) {
-          instance.wrapper.style.display = 'none';
-        }
-        wrapper.style.display = '';
-        requestAnimationFrame(() => {
-          renderer.refreshSize();
-        });
-      } else {
+      // 如果该地图尚未加载，尝试加载
+      if (!mapInstances.has(mapname)) {
         button.disabled = true;
         try {
           const url = `${MAPS_BASE_PATH}${mapname}.json`;
@@ -401,29 +393,53 @@
 
           const renderer = new MapRenderer(wrapperContainer, mapData);
           mapInstances.set(mapname, { renderer, wrapper: wrapperContainer });
-
-          for (const [name, instance] of mapInstances) {
-            if (name !== mapname) {
-              instance.wrapper.style.display = 'none';
-            }
-          }
         } catch (err) {
           console.error(`加载地图失败 [${mapname}]:`, err);
-        } finally {
           button.disabled = false;
+          return; // 加载失败，不更新界面
         }
+        button.disabled = false;
       }
 
-      // 更新激活状态
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
+      // 切换显示：隐藏其他地图，显示当前地图
+      for (const [name, instance] of mapInstances) {
+        instance.wrapper.style.display = name === mapname ? '' : 'none';
+      }
 
-      // 更新页脚链接
+      // 刷新当前地图尺寸
+      const { renderer } = mapInstances.get(mapname);
+      requestAnimationFrame(() => {
+        renderer.refreshSize();
+      });
+
+      // 更新按钮激活状态
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      if (button.classList.contains('sub-map-tab')) {
+        const dropdown = button.closest('.dropdown');
+        const parentBtn = dropdown?.querySelector('.dropbtn');
+        if (parentBtn) {
+          parentBtn.classList.add('active');
+        }
+      } else {
+        button.classList.add('active');
+      }
+
+      // 更新页脚链接（包含计数）
       const footerLink = document.getElementById('footer-wiki-link');
       if (footerLink) {
-        const mapName = button.getAttribute('data-mapname');
-        footerLink.href = 'https://wiki.biligame.com/starengine/' + encodeURIComponent(mapName);
-        footerLink.textContent = 'Wiki：' + mapName;
+        let displayName = button.getAttribute('data-mapname') || '';
+        const dropdownContent = button.closest('.dropdown-content');
+        if (dropdownContent) {
+          const dropdown = dropdownContent.closest('.dropdown');
+          const parentBtn = dropdown?.querySelector('.dropbtn');
+          if (parentBtn) {
+            displayName = parentBtn.getAttribute('data-mapname') || parentBtn.textContent.trim();
+          }
+        }
+        // 获取当前地图的格子计数
+        const cellCount = renderer.getCellCount();
+        footerLink.href = 'https://wiki.biligame.com/starengine/' + encodeURIComponent(displayName);
+        footerLink.textContent = `Wiki：${displayName}(${cellCount})`;
       }
     }
 

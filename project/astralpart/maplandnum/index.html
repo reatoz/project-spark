@@ -28,6 +28,8 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       flex-wrap: wrap;
       justify-content: center;
+      position: relative;    
+      z-index: 10;           
     }
 
     .map-tab {
@@ -79,6 +81,58 @@
     svg.map-arrows {
       pointer-events: none;
     }
+    .dropdown {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .dropdown::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      height: 6px;          /* 这个高度必须等于菜单的向下偏移量 */
+    }
+    .dropbtn {
+      cursor: pointer;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      z-index: 20;
+      padding: 0.4em;
+      /* 横向排列 */
+      flex-direction: row;
+      gap: 4px;
+    }
+    .dropdown-content .map-tab {
+      display: block;
+      width: 100%;
+      padding: 0.6em 1.2em;
+      text-align: left;
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .dropdown-content .sub-map-tab {
+      padding: 0.5em 0.8em;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .dropdown:hover .dropdown-content {
+      display: flex;
+    }
   </style>
 </head>
 <body>
@@ -89,6 +143,14 @@
       <button class="map-tab active" data-mapname="星趴•梦想号">星趴•梦想号</button>
       <button class="map-tab" data-mapname="御魂庆典">御魂庆典</button>
       <button class="map-tab" data-mapname="水乡古镇">水乡古镇</button>
+      <div class="dropdown" style="display:inline-flex;align-items:center;">
+        <button class="map-tab dropbtn">魔法学院</button>
+        <div class="dropdown-content">
+          <button class="sub-map-tab map-tab" data-mapname="门外">门外</button>
+          <button class="sub-map-tab map-tab" data-mapname="魔法图书馆">魔法图书馆</button>
+          <button class="sub-map-tab map-tab" data-mapname="甜点空间">甜点空间</button>
+        </div>
+      </div>
       <button class="map-tab" data-mapname="龙宫游乐园">龙宫游乐园</button>
       <button class="map-tab" data-mapname="幽魂暗巷">幽魂暗巷</button>
       <button class="map-tab" data-mapname="园林中庭">园林中庭</button>
