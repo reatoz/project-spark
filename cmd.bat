@@ -1,2 +1,4 @@
 @echo off
-start "" /D "%~dp0" cmd
+cd /d "%~dp0"
+npx serve .
+pause

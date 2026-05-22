@@ -95,6 +95,7 @@
             <span class="dropbtn">小工具</span>
             <div class="dropdown-content">
               <a href="/project/astralpart/rolediy/">星趴角色模拟器</a>
+              <a href="/project/astralpart/rolediy/indexold.html">星趴角色模拟器(旧)</a>
               <a href="/project/astralpart/carddiy/">星趴卡牌制作器</a>
               <a href="/project/astralpart/maplandnum/">星趴地图路径</a>
               <!-- 新增工具，在这里添加新的 <a> 链接 -->

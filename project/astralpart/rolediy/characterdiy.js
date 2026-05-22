@@ -144,6 +144,14 @@
     } else {
       skillModeSwitch.classList.remove('active');
     }
+    const standardSwitch = document.getElementById('set-standard-switch');
+    if (standardSwitch) {
+      if (charData.isStandard) {
+        standardSwitch.classList.add('active');
+      } else {
+        standardSwitch.classList.remove('active');
+      }
+    }
   }
   
   function saveCurrentSkillData() {
@@ -331,7 +339,8 @@
     skillIconUrl: 'https://patchwiki.biligame.com/images/starengine/9/9a/cshh2jxyoo2lmldzobwbf6h3bnm7qb0.png',
     archiveBirthday: '8月2日',
     archiveLikeFood: '精致的便当盒',
-    archiveDesc: '&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。\n&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。'
+    archiveDesc: '&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。\n&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。',
+    isStandard: false 
   };
 
   // ---------- 6. 异步加载数据（从 localStorage + IndexedDB）----------
@@ -364,6 +373,7 @@
     initImageInteractions();
     setSkillModeUI(currentSkillMode);
     updatePreview(true);
+    syncEditControls();
     updateEditAreaVisibility();
   }
 
@@ -822,6 +832,17 @@
       const newTx = target - rawRight;
       leftName2.style.transform = `translateX(${newTx}px)`;
     })();
+
+    const standardIcon = document.querySelector('.standard-tag img');
+    if (standardIcon) {
+      standardIcon.src = charData.isStandard
+        ? 'https://patchwiki.biligame.com/images/starengine/4/46/dow0syl6wl9btumf9q1xbn83z46se4j.png'   // 激活图片
+        : 'https://patchwiki.biligame.com/images/starengine/0/04/f7r5lfgijgz54za826go5t6u4x6ltf9.png'; // 默认图片
+    }
+    const standardText = document.getElementById('preview-tag-text-standard');
+    if (standardText) {
+        standardText.style.color = charData.isStandard ? '#ff1897' : '';
+    }
   }
 
   // ---------- 10. 编辑区输入绑定 ----------
@@ -965,6 +986,14 @@
     await saveData();
     updatePreview(false);
   });
+
+  document.getElementById('set-standard-switch')?.addEventListener('click', async function() {
+    this.classList.toggle('active');
+    charData.isStandard = this.classList.contains('active');
+    await saveData();
+    updatePreview(false);
+  });
+
   
   // 立绘上传
   document.getElementById('upload-avatar-btn').addEventListener('click', () => document.getElementById('avatar-file-input').click());

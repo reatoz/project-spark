@@ -6,13 +6,14 @@
   <title>星趴角色模拟器</title>
   <meta name="description" content="星引擎diy工具,模拟吉星派对角色界面截图">
   <link rel="stylesheet" href="/common.css">
+  <link rel="stylesheet" href="/css/update-log.css">
   <style>
     /* ===== 引入外部字体 ===== */
     @import url("https://fontsapi.zeoseven.com/298/main/result.css");
     @import url("https://db.onlinewebfonts.com/c/d66fa62dabed66f2226a1b2d17da0579?family=Showcard+Gothic");
     @import url("https://db.onlinewebfonts.com/c/771d2d395300ea1b80c34ba5282bf694?family=Impact");
-  
-    /* 整体容器：16:9比例，居中 */
+
+    /* 整体容器 */
     #character-diy-container {
       font-family: "荆南波波黑", "Showcard Gothic", Arial, sans-serif;
       font-size: 20px;
@@ -21,39 +22,28 @@
       margin: 0 auto;
       color: #fff;
     }
-  
-    /* 黑色描边通用样式（用于称号、名字等） */
+
+    /* 黑色描边通用样式 */
     .left-name1, 
     .left-name2, 
     .intimacy-value, 
     .right-title, 
     .char-potential, 
     .char-archive {
-      color: #ffffff !important;
-      text-shadow: 2.6px 0 0 #000, 2.4px 0.99px 0 #000, 1.84px 1.84px 0 #000, 
-                    0.99px 2.4px 0 #000, 0 2.6px 0 #000, -0.99px 2.4px 0 #000, 
-                    -1.84px 1.84px 0 #000, -2.4px 0.99px 0 #000, -2.6px 0 0 #000, 
-                    -2.4px -0.99px 0 #000, -1.84px -1.84px 0 #000, -0.99px -2.4px 0 #000, 
-                    0 -2.6px 0 #000, 0.99px -2.4px 0 #000, 1.84px -1.84px 0 #000, 
-                    2.4px -0.99px 0 #000;
+        color: #ffffff !important;
+        text-shadow: 2.6px 0 0 #000, 2.4px 0.99px 0 #000, 1.84px 1.84px 0 #000, 
+                        0.99px 2.4px 0 #000, 0 2.6px 0 #000, -0.99px 2.4px 0 #000, 
+                        -1.84px 1.84px 0 #000, -2.4px 0.99px 0 #000, -2.6px 0 0 #000, 
+                        -2.4px -0.99px 0 #000, -1.84px -1.84px 0 #000, -0.99px -2.4px 0 #000, 
+                        0 -2.6px 0 #000, 0.99px -2.4px 0 #000, 1.84px -1.84px 0 #000, 
+                        2.4px -0.99px 0 #000;
     }
-  
-    .tag-text, 
-    .function-tags span {
-      color: #ffffff !important;
-      text-shadow: 3px 0 0 #000, 2.77px 1.15px 0 #000, 2.12px 2.12px 0 #000, 
-                    1.15px 2.77px 0 #000, 0 3px 0 #000, -1.15px 2.77px 0 #000, 
-                    -2.12px 2.12px 0 #000, -2.77px 1.15px 0 #000, -3px 0 0 #000, 
-                    -2.77px -1.15px 0 #000, -2.12px -2.12px 0 #000, -1.15px -2.77px 0 #000, 
-                    0 -3px 0 #000, 1.15px -2.77px 0 #000, 2.12px -2.12px 0 #000, 
-                    2.77px -1.15px 0 #000;
-    }
-  
+
     .preview-section {
       margin-bottom: 30px;
     }
-  
-    /* 角色卡片主容器：多层背景叠加 */
+
+    /* 角色卡片主容器 */
     .character-card {
       position: relative;
       width: 100%;
@@ -67,14 +57,14 @@
         url('https://patchwiki.biligame.com/images/starengine/7/7d/6w02movplttlhg7bo3ou2zx40gsn3gj.png'),
         url('https://patchwiki.biligame.com/images/starengine/3/39/ficce0in6gt1xf8yyb15q0n9y93yua5.png');
       background-position:
-        left center,   /* 左侧图案 */
-        left top,      /* 左侧装饰 */
-        left top,     /* 白色斜线平铺 */
-        center;        /* 背景图居中 */
+        left center,
+        left top,
+        left top,
+        center;
       background-size:
         auto 75.5%,
         45% 100%,
-        64px  64px,
+        64px 64px,
         cover;
       background-repeat:
         no-repeat,
@@ -83,7 +73,7 @@
         no-repeat;
       background-color: transparent;
     }
-  
+
     /* 左上角返回按钮 */
     .return-text {
       position: absolute;
@@ -124,8 +114,8 @@
       pointer-events: none;
       white-space: nowrap;
     }
-  
-    /* 左侧大立绘容器（支持拖拽缩放） */
+
+    /* 左侧立绘 */
     .left-avatar {
       position: absolute;
       left: 50%;
@@ -156,11 +146,11 @@
     .left-avatar img:active {
       cursor: grabbing;
     }
-  
-    /* 左侧U形背景块（称号+角色名） */
+
+    /* 左侧U形背景块 */
     .left-name-block {
       position: absolute;
-      right: 44.5%;
+      right: 43.2%;
       bottom: 152px;
       padding: 2px 36px 2px 1px;
       height: 60px;
@@ -180,8 +170,10 @@
       width: 100%;
       height: 100%;
       background: url('https://patchwiki.biligame.com/images/starengine/9/91/h9ym1j27tjtw7soxzxr40qip6eul305.png') no-repeat -40px center / auto 100%;
-      opacity: 0.58;
+      opacity: 0.68;
       z-index: -1;
+      mask-image: linear-gradient(to right, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.35) 20%,rgba(0,0,0,0.55) 50%,rgba(0,0,0,0.9) 100%);
+    -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.35) 20%, rgba(0,0,0,0.55) 50%,rgba(0,0,0,0.9) 100%);
     }
     
     .left-name1, .left-name2 {
@@ -192,21 +184,21 @@
     .left-name1 {
       display: block;
       font-size: 12px;
-      transform: translateX(-10px);
+      transform: translateX(-20px);
     }
     
     .left-name2 {
       display: block;
       font-size: 22px;
-      transform: translateX(10px);
+      transform: translateX(2px);
       text-align: right;
       white-space: nowrap;
     }
-  
-    /* 点击预览按钮 */
+
+    /* 点击预览 */
     .clickpreview-text {
       position: absolute;
-      left: calc(100% - 44.5% - 185px);
+      left: calc(100% - 44.5% - 168px);
       transform: translateX(-50%);
       bottom: 215px;
       z-index: 3;
@@ -225,11 +217,11 @@
       white-space: nowrap;
       text-shadow: 0.5px 0 0 #000, -0.5px 0 0 #000, 0 0.5px 0 #000, 0 -0.5px 0 #000;
     }
-  
-    /* 亲密度区域 */
+
+    /* 亲密度 */
     .intimacy-area {
       position: absolute;
-      left: 27%;
+      left: 28%;
       bottom: 116px;
       width: auto;
       z-index: 2;
@@ -269,7 +261,7 @@
     
     .intimacy-bar {
       position: absolute;
-      left: 68px;
+      left: 75px;
       top: 28px;
       width: 78px;
       height: 4px;
@@ -278,15 +270,15 @@
     
     .intimacy-value {
       position: absolute;
-      left: calc(68px + 63px/2 + 11px);
+      left: calc(68px + 63px/2 + 24px);
       transform: translateX(-50%);
       top: 32px;
       font-size: 19px;
       color: #fff;
       white-space: nowrap;
     }
-  
-    /* 左右浮动装饰图标动画 */
+
+    /* 浮动图标 */
     .float-icon {
       position: absolute;
       top: 53%;
@@ -320,7 +312,7 @@
       50% { transform: translateY(-50%) scaleX(-1) translateX(-6px); }
       100% { transform: translateY(-50%) scaleX(-1) translateX(0); }
     }
-  
+
     /* 水印 */
     .watermark {
       position: absolute;
@@ -332,24 +324,39 @@
       z-index: 999;
       transform: translateY(-50%) rotate(-90deg);
     }
-  
-    /* 右侧内容区（灰色圆角背景） */
+
+    /* ========== 右侧内容区 ========== */
     .right-content {
       position: absolute;
       right: 0;
-      top: 20px;
-      bottom: 20px;
+      top: 32px;
+      bottom: 28px;
       width: 56%;
       display: flex;
       flex-direction: column;
-      gap: 4px;
       z-index: 5;
-      background-color: #636363;
+      background-color: #272b36;          /* 深色底色 */
       border-radius: 20px 0 0 20px;
-      padding: 0;
-      overflow-y: auto;
+      overflow: hidden;                   /* 裁剪圆角 */
     }
-  
+
+    /* 内部灰色区域（原#636363），包裹除底部标签外所有内容 */
+    .right-inner {
+        position: absolute;
+        bottom: 7px;
+        left: 8px;          
+        right: 0;
+        height: 84.1%;        
+        background-color: #636363;
+        border-radius: 20px 0 0 20px;   
+        z-index: 9;        
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+
+    /* 其余样式保持原状（略作精简，不改变效果） */
     .right-name {
       font-size: 36px;
       color: #fff;
@@ -361,6 +368,8 @@
                     3.7px -1.53px 0 #000;
       margin: 4px 0 0 40px;
       line-height: 1.2;
+      position: relative;
+      top:7px;
     }
     
     .right-title {
@@ -368,52 +377,100 @@
       color: #a3c4f3;
       margin: 0 0 0 44px;
       line-height: 1.2;
+      position: relative;
+      top: 7px;
     }
-  
-    /* 四个标签行（技能/升级/潜能/档案） */
+
     .tags-row {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      margin-top: 4px;
-      margin-bottom: 6px;
-      padding-left: 20px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-top: 14px;
+        margin-bottom: -4px;
+        padding-left: 20px;
+    }
+
+
+    .tags-row:hover .tag-item {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/1/1e/b804sx27iubzi7tfbw1gdxuvn0n8ai8.png');
+    }
+    
+    .tags-row .tag-item:hover {
+      background-image: url('https://patchwiki.biligame.com/images/starengine/0/0b/4rocwm64l4rqos2jbaoohbecizhmvjp.png');
     }
     
     .tag-icon img {
-      width: 23px;
-      height: auto;
+        width: 23px;
+        height: auto;
+        vertical-align: middle;
+        left: -4px; 
+    }
+    .upgrade-tag .tag-icon img{
+        width: 28px;
+        height: auto;
+        position: relative;
+        top: -3px;        
+    }
+    .potential-tag .tag-icon img {
+        position: relative;
+        top: -2px;        
+    }
+    .archive-tag .tag-icon img {
+        width: 18px;
+        height: auto;
+        position: relative;
+        top: -2px; 
     }
     
     .tag-icon-skill img {
-      width: 36px;
-      height: auto;
-      margin-left: -8px;
+        width: 32px;
+        height: auto;
+        position: relative;
+        vertical-align: middle;
     }
     
     .tag-item {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 18px;
-      padding: 4px 16px;
+      gap: 16px;
+      padding: 2px 16px;
       border-radius: 20px;
       background: rgba(0,0,0,0.3);
-      flex: 0 0 22.3%;
+      flex: 0 0 23.3%;
       min-width: 0;
       white-space: nowrap;
       box-sizing: border-box;
+      filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.7));
+    transition: top 0.2s, background 0.2s, filter 0.2s; /* 加入滤镜过渡 */
     }
     
     .tag-text {
-      font-size: 19px;
+      font-size: 18px;
       line-height: 1;
+      color: #ffffff !important;
+      text-shadow: 
+    2.4px 0 0 #000,
+    2.22px 0.92px 0 #000,
+    1.70px 1.70px 0 #000,
+    0.92px 2.22px 0 #000,
+    0 2.4px 0 #000,
+    -0.92px 2.22px 0 #000,
+    -1.70px 1.70px 0 #000,
+    -2.22px 0.92px 0 #000,
+    -2.4px 0 0 #000,
+    -2.22px -0.92px 0 #000,
+    -1.70px -1.70px 0 #000,
+    -0.92px -2.22px 0 #000,
+    0 -2.4px 0 #000,
+    0.92px -2.22px 0 #000,
+    1.70px -1.70px 0 #000,
+    2.22px -0.92px 0 #000;
     }
     
     .tag-item.skill-tag {
       justify-content: flex-start;
-      gap: 14px;
       background: none;
       background-image: url('https://patchwiki.biligame.com/images/starengine/0/0b/4rocwm64l4rqos2jbaoohbecizhmvjp.png');
       background-size: cover;
@@ -430,15 +487,6 @@
       background-position: center;
       background-repeat: no-repeat;
     }
-  
-    /* 标签悬停联动效果 */
-    .tags-row:hover .tag-item {
-      background-image: url('https://patchwiki.biligame.com/images/starengine/1/1e/b804sx27iubzi7tfbw1gdxuvn0n8ai8.png');
-    }
-    
-    .tags-row .tag-item:hover {
-      background-image: url('https://patchwiki.biligame.com/images/starengine/0/0b/4rocwm64l4rqos2jbaoohbecizhmvjp.png');
-    }
     
     .tag-item.potential-active,
     .tag-item.archive-active {
@@ -448,33 +496,33 @@
     .tag-item.force-pink {
       background-image: url('https://patchwiki.biligame.com/images/starengine/1/1e/b804sx27iubzi7tfbw1gdxuvn0n8ai8.png') !important;
     }
-  
-    /* 默认面板背景 */
+
+    .default-panel {
+        margin-top: 14px;   
+    }
+
     .background-wrapper {
       background-image: url('https://patchwiki.biligame.com/images/starengine/d/d3/d19bzrd4d15nf8mrk7ro8l7kdz2otzh.png');
       background-size: 100% auto;
       background-position: top;
       background-repeat: no-repeat;
-      padding: 15px 0;
+      padding: 2px 0;
       border-radius: 0;
     }
-  
-    /* 数值字体 */
+
     .stat-value, 
     .level-number, 
     .cd-time {
-      font-family: "Showcard Gothic", Arial, sans-serif;
-      text-shadow: 1px 0 0 #000, 0.92px 0.38px 0 #000, 0.71px 0.71px 0 #000, 
-                    0.38px 0.92px 0 #000, 0 1px 0 #000, -0.38px 0.92px 0 #000, 
-                    -0.71px 0.71px 0 #000, -0.92px 0.38px 0 #000, -1px 0 0 #000, 
-                    -0.92px -0.38px 0 #000, -0.71px -0.71px 0 #000, -0.38px -0.92px 0 #000, 
-                    0 -1px 0 #000, 0.38px -0.92px 0 #000, 0.71px -0.71px 0 #000, 
-                    0.92px -0.38px 0 #000;
+        font-family: "Showcard Gothic", Arial, sans-serif;
+        text-shadow: 1px 0 0 #000, 0.92px 0.38px 0 #000, 0.71px 0.71px 0 #000, 
+                        0.38px 0.92px 0 #000, 0 1px 0 #000, -0.38px 0.92px 0 #000, 
+                        -0.71px 0.71px 0 #000, -0.92px 0.38px 0 #000, -1px 0 0 #000, 
+                        -0.92px -0.38px 0 #000, -0.71px -0.71px 0 #000, -0.38px -0.92px 0 #000, 
+                        0 -1px 0 #000, 0.38px -0.92px 0 #000, 0.71px -0.71px 0 #000, 
+                        0.92px -0.38px 0 #000;
     }
     
-    .stat-value {
-      font-size: 26px;
-    }
+    .stat-value { font-size: 24px; }
     
     .level-number {
       position: absolute;
@@ -482,18 +530,16 @@
       left: 50%;
       transform: translate(-50%, -50%);
       color: white;
-      font-size: 28px;
+      font-size: 24px;
       z-index: 10;
       white-space: nowrap;
     }
     
-    .cd-time {
-      font-size: 24px;
-    }
-  
+    .cd-time { font-size: 18px; }
+
     .stats-row {
       display: flex;
-      gap: 0 60px;
+      gap: 0 41px;
       margin: 2px 0 2px 40px;
       margin-bottom: 5px;
     }
@@ -505,8 +551,14 @@
     }
     
     .stat-icon { font-size: 20px; }
-    .stat-icon img { width: 20px; height: auto; }
-  
+    .stat-icon img { 
+        width: 24px; 
+        height: auto;
+        vertical-align: middle;   /* 先确保对齐 */
+        position: relative;
+        top: 0;     
+    }
+
     .challenge-row {
       display: flex;
       align-items: center;
@@ -522,6 +574,7 @@
       position: relative;
       width: 40px;
       height: 40px;
+      transform: translateX(-11px);
     }
     
     .level-icon {
@@ -545,24 +598,31 @@
       background: transparent;
       padding: 4px 12px;
       border-radius: 30px;
+      position: relative;
+      left:6px;
+    }
+    .potential-icon img{
+      vertical-align: middle;
+      position: relative;
+      top: -2px;
     }
     
     .challenge-text, .level-text, .potential-text {
-      font-size: 21px;
+      font-size: 18px;
     }
-  
-    /* 技能行 */
+
+
     .skill-row.active {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: 2px;
+      gap: 17px;
+      margin-top: -4px;
       width: 100%;
     }
     
     .skill-name-bg {
       background: #1a1a1a;
-      padding: 3px 0 3px 12px;
+      padding: 0 0 3px 12px;
       margin-left: 10px;
       width: 55%;
       box-sizing: border-box;
@@ -571,14 +631,12 @@
       font-weight: bold;
       white-space: nowrap;
       overflow: hidden;
-      font-size: 16px;
+      font-size: 15px;
       font-family: "Microsoft YaHei", "微软雅黑", "Showcard Gothic", Arial, sans-serif;
       flex-shrink: 0;
     }
     
-    .passive .skill-name-bg {
-      color: #98fcfd;
-    }
+    .passive .skill-name-bg { color: #98fcfd; }
     
     .cd-item {
       display: flex;
@@ -590,12 +648,16 @@
     }
     
     .cd-icon { font-size: 30px; }
-  
-    /* 技能模式切换（PVE/PVP） */
+    .cd-icon img{
+        vertical-align: middle;   
+        position: relative;
+        top: -2px;
+    }
+
     .skill-mode-wrapper {
       position: absolute;
       right: 5px;
-      top: 258px;
+      top: 232px;
       z-index: 10;
       width: auto;
       height: auto;
@@ -610,7 +672,7 @@
       border-radius: 55px;
       overflow: hidden;
       width: fit-content;
-      gap: 6px;
+      gap: 8px;
       padding: 0;
       margin: 0;
       user-select: none;
@@ -618,14 +680,14 @@
     
     .circle {
       position: relative;
-      width: 55px;
-      height: 55px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       display: flex !important;
       justify-content: center;
       align-items: center;
       color: #666666;
-      font-size: 27px;
+      font-size: 25px;
       font-weight: bold;
       z-index: 2;
       transition: color 0.3s ease;
@@ -646,8 +708,8 @@
     }
     
     .active-indicator {
-      width: 54px;
-      height: 54px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
       background-image: url('https://patchwiki.biligame.com/images/starengine/1/16/d020si32vciyklpqcvaq2531n122e8m.png');
       background-size: contain;
@@ -665,170 +727,209 @@
     }
     
     .circle.active { color: #fff; }
-  
-    /* 技能描述 */
+
     .skill-desc {
-      background: transparent;
-      padding: 4px 12px;
-      border-radius: 12px;
-      margin-bottom: 2px;
-      margin-top: -3px;
-      margin-left: 10px;
-      font-size: 14px;
-      white-space: pre-wrap;
-      width: 80%;
+        background: transparent;
+        padding: 4px 12px;
+        border-radius: 12px;
+        margin-bottom: 2px;
+        margin-top: 0;
+        margin-left: 10px;
+        font-size: 12px;
+        white-space: pre-wrap;
+        width: 80%;
     }
     
     #preview-active-desc { margin-top: -5px; }
-  
-    /* 底部功能标签 */
+
+    /* 标签容器 */
     .function-tags {
-      display: flex;
-      flex-wrap: nowrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      background: #1a1a1a;
-      border-bottom-left-radius: 20px;
-      height: 77px;
-      padding: 0 10px;
-      margin-top: auto;
-      width: 100%;
-      box-sizing: border-box;
+        position: absolute;
+        top: 24px;
+        left: 12px;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        z-index: 5;
     }
-    
-    .function-tags > span {
-      flex: 1 1 0;
-      min-width: 0;
-      height: 46px;
-      box-sizing: border-box;
-      white-space: nowrap;
-      text-align: center;
-      font-size: 23px;
-      color: white;
-      line-height: 48px;
-      border-radius: 20px;
-      background-size: contain;
-      background-position: center;
-      background-repeat: no-repeat;
-      transition: none;
-      background-color: transparent;
+
+    .function-tags > div {
+        width: 25%;
+        aspect-ratio: 1 / 0.6;        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        position: relative;
+        box-sizing: border-box;
+        border-radius: 20px;
+        box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.7);   /* 黑色发光 */
+        transition: top 0.2s, background 0.2s, box-shadow 0.2s, z-index 0s; /* 加入阴影过渡 */
+        background: #ff1596;
+        overflow: hidden; 
     }
-    
+
+    .function-tags > div span {
+        position: relative;
+        top: -12px; 
+        text-shadow: 
+            4px 0 0 #000,
+            3.70px 1.53px 0 #000,
+            2.83px 2.83px 0 #000,
+            1.53px 3.70px 0 #000,
+            0 4px 0 #000,
+            -1.53px 3.70px 0 #000,
+            -2.83px 2.83px 0 #000,
+            -3.70px 1.53px 0 #000,
+            -4px 0 0 #000,
+            -3.70px -1.53px 0 #000,
+            -2.83px -2.83px 0 #000,
+            -1.53px -3.70px 0 #000,
+            0 -4px 0 #000,
+            1.53px -3.70px 0 #000,
+            2.83px -2.83px 0 #000,
+            3.70px -1.53px 0 #000;
+        }
+
     .function-tags .file-tag {
-      background-image: url('https://patchwiki.biligame.com/images/starengine/3/33/l3irzv0rmcw7c5tlsavgo60i3lftmi9.png');
-      background-color: #a2ff17;
+        top: -16px;
+        background: #87ff00;
+        z-index: 5;
+    }
+
+    .function-tags .file-tag span {
+        position: relative;
+        top: -8px;  
+    }
+
+    /* 鼠标悬停 2、3、4 号容器时的效果 */
+    .contract-tag:hover,
+    .skin-tag:hover,
+    .expression-tag:hover {
+        top: -16px;
+        background: #87ff00;
     }
     
-    .function-tags .contract-tag,
-    .function-tags .skin-tag,
-    .function-tags .expression-tag {
-      background-image: url('https://patchwiki.biligame.com/images/starengine/7/77/kj3g8yb4hspyqweausn1n0cpt28mk4l.png');
+    /* 左侧压右侧 4px */
+    .function-tags > div:not(:first-child) {
+        margin-left: -2px;
     }
-    
-    .function-tags:hover > span {
-      background-image: url('https://patchwiki.biligame.com/images/starengine/7/77/kj3g8yb4hspyqweausn1n0cpt28mk4l.png') !important;
-      background-color: #000 !important;
+    .function-tags > div:nth-child(1) { z-index: 4; }
+    .function-tags > div:nth-child(2) { z-index: 3; }
+    .function-tags > div:nth-child(3) { z-index: 2; }
+    .function-tags > div:nth-child(4) { z-index: 1; }
+
+    .function-tags > div::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 43%;
+        width: 100px;               /* 斜线长度（连接两点所需） */
+        height: 10px;              /* 线条粗细 */
+        background: #fcffff;
+        transform-origin: 0 0;     /* 旋转基点设在左上角 */
+        transform: rotate(-45deg); /* 近似 -19.5°，微调可改变终点位置 */
+        z-index: 2;
+        border-radius: 2px;        /* 可选，让线头稍柔和 */
     }
-    
-    .function-tags > span:hover {
-      background-image: url('https://patchwiki.biligame.com/images/starengine/3/33/l3irzv0rmcw7c5tlsavgo60i3lftmi9.png') !important;
-      background-color: #a2ff17 !important;
-    }
-  
-    /* 潜能面板 */
+
+
+
+    /* 潜能 */
     .potential-panel {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        margin-top: 14px; 
     }
     
     .potential-bg {
-      flex: 0 0 61%;
-      background-image: url('https://patchwiki.biligame.com/images/starengine/d/d3/d19bzrd4d15nf8mrk7ro8l7kdz2otzh.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      border-radius: 0;
-      margin: 0;
+        flex: 0 0 61%;
+        background-image: url('https://patchwiki.biligame.com/images/starengine/d/d3/d19bzrd4d15nf8mrk7ro8l7kdz2otzh.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 0;
+        margin: 0;
     }
     
     .potential-no {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 75.5% 24.5%;
-      grid-template-rows: 17% 70% auto;
-      height: 100%;
+        flex: 1;
+        display: grid;
+        grid-template-columns: 75.5% 24.5%;
+        grid-template-rows: 17% 70% auto;
+        height: 100%;
     }
     
     .potential-no-header {
-      grid-column: 1 / 2;
-      grid-row: 1 / 2;
-      margin-top: 4px;
-      margin-left: 36px;
-      width: 100%;
-      color: #6eff05;
-      text-shadow: 3px 0 0 #000, 2.77px 1.15px 0 #000, 2.12px 2.12px 0 #000, 
-                    1.15px 2.77px 0 #000, 0 3px 0 #000, -1.15px 2.77px 0 #000, 
-                    -2.12px 2.12px 0 #000, -2.77px 1.15px 0 #000, -3px 0 0 #000, 
-                    -2.77px -1.15px 0 #000, -2.12px -2.12px 0 #000, -1.15px -2.77px 0 #000, 
-                    0 -3px 0 #000, 1.15px -2.77px 0 #000, 2.12px -2.12px 0 #000, 
-                    2.77px -1.15px 0 #000;
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+        margin-top: 4px;
+        margin-left: 36px;
+        width: 100%;
+        color: #6eff05;
+        text-shadow: 3px 0 0 #000, 2.77px 1.15px 0 #000, 2.12px 2.12px 0 #000, 
+                        1.15px 2.77px 0 #000, 0 3px 0 #000, -1.15px 2.77px 0 #000, 
+                        -2.12px 2.12px 0 #000, -2.77px 1.15px 0 #000, -3px 0 0 #000, 
+                        -2.77px -1.15px 0 #000, -2.12px -2.12px 0 #000, -1.15px -2.77px 0 #000, 
+                        0 -3px 0 #000, 1.15px -2.77px 0 #000, 2.12px -2.12px 0 #000, 
+                        2.77px -1.15px 0 #000;
     }
     
     .potential-no-items {
-      grid-column: 1 / 2;
-      grid-row: 2 / 3;
-      margin-top: 12px;
-      box-sizing: border-box;
-      background-color: #292929;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      border-radius: 0 12px 12px 0;
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+        margin-top: 12px;
+        box-sizing: border-box;
+        background-color: #292929;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        border-radius: 0 12px 12px 0;
     }
     
     .potential-no-items1 {
-      width: 65px;
-      height: 65px;
-      background-image: url('https://patchwiki.biligame.com/images/starengine/d/da/5q3l7rex6f3snqrotied39nnvo7e52o.png'), 
-                        url('https://patchwiki.biligame.com/images/starengine/0/06/70yjl5wtjohggzfow1ymncwc685iibr.png');
-      background-size: cover, cover;
-      background-position: center, center;
-      background-repeat: no-repeat, no-repeat;
+        width: 65px;
+        height: 65px;
+        background-image: url('https://patchwiki.biligame.com/images/starengine/d/da/5q3l7rex6f3snqrotied39nnvo7e52o.png'), 
+                            url('https://patchwiki.biligame.com/images/starengine/0/06/70yjl5wtjohggzfow1ymncwc685iibr.png');
+        background-size: cover, cover;
+        background-position: center, center;
+        background-repeat: no-repeat, no-repeat;
     }
     
     .potential-no-items2 {
-      width: 65px;
-      height: 65px;
-      background-image: url('https://patchwiki.biligame.com/images/starengine/f/fe/0vfbwc0zty8ng946p593md62jestnnt.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+        width: 65px;
+        height: 65px;
+        background-image: url('https://patchwiki.biligame.com/images/starengine/f/fe/0vfbwc0zty8ng946p593md62jestnnt.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
     }
     
     .potential-no-items2-stuff {
-      position: relative;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+        position: relative;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     
     .potential-no-items2-stuff img {
-      max-width: 100%;
-      height: auto;
-      display: block;
+        max-width: 100%;
+        height: auto;
+        display: block;
     }
     
     .items2-stuff-group {
-      position: absolute;
-      left: 50%;
-      bottom: -8px;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      font-size: 11px;
+        position: absolute;
+        left: 50%;
+        bottom: -8px;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-size: 11px;
     }
     
     .potential-no-items3 {
@@ -878,7 +979,7 @@
       background: #b863fe;
       padding: 2px 0 2px 36px;
       margin-left: 0;
-      margin-top: 8px;
+      margin-top: 10px;
       width: 73%;
       box-sizing: border-box;
       border-radius: 0 15px 15px 0;
@@ -891,23 +992,23 @@
     
     .char-potential-desc {
       font-size: 15px;
-      padding: 4px 0 2px 36px;
+      padding: 8px 0 2px 36px;
       margin-left: 0;
       box-sizing: border-box;
       white-space: pre-wrap;
       overflow: hidden;
       flex-shrink: 0;
     }
-  
-    /* 档案面板 */
+
     .archive-panel {
       display: flex;
       flex-direction: column;
       flex: 1;
+      margin-top: 14px; 
     }
     
     .archive-bg {
-      flex: 0 0 102%;
+      flex: 0 0 97.8%;
       background-image: url('https://patchwiki.biligame.com/images/starengine/d/d3/d19bzrd4d15nf8mrk7ro8l7kdz2otzh.png');
       background-size: cover;
       background-position: center;
@@ -932,11 +1033,14 @@
       gap: 145px;
     }
     
-    .char-archive-desc-box { margin-left: -28px; }
+    .char-archive-desc-box { 
+        margin-left: -33px; 
+        padding: 0 12px 0 0; 
+    }
     
     .char-archive-full-name {
       font-size: 18px;
-      padding: 8px;
+      padding: 10px 10px 8px 8px;
       border-radius: 8px;
       margin-left: 30px;
       margin-bottom: 12px;
@@ -945,7 +1049,7 @@
     }
     
     .archive-detail {
-      font-size: 16px;
+      font-size: 15px;
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -967,8 +1071,8 @@
       font-weight: normal;
       white-space: normal;
     }
-  
-    /* ========== 编辑区样式 ========== */
+
+    /* 编辑区样式 */
     .edit-section {
       background: #ffffff;
       border-radius: 0;
@@ -1004,7 +1108,6 @@
       padding-bottom: 0;
     }
     
-    /* 编辑区标签默认最小宽度，保证对齐 */
     .control-group label {
       display: inline-block;
       min-width: auto;
@@ -1018,11 +1121,6 @@
       flex: 0 1 auto;    
       min-width: 60px;    
     }
-    /*处理“主动技能/被动技能描述”单开一行*/
-    /* .desc-label {
-      flex-basis: 100%;   
-      margin-top: 8px;   
-    } */
 
     .text-input, .number-input, .textarea-input {
       background: #ffffff;
@@ -1031,7 +1129,7 @@
       padding: 6px 10px;
       color: #000;
       width: auto;
-      min-width: 50px;   /* 统一数字框最小宽度，避免过宽撑开 */
+      min-width: 50px;
       flex: 1 1 auto;
       box-sizing: border-box;
       margin-bottom: 0;
@@ -1141,372 +1239,311 @@
     .control-group:last-child .btn {
       margin-right: 5px;
     }
-  
+
     .top-switches {
       align-items: flex-start;
     }
 
     #save-img-btn,
     #reset-btn {
-      margin-top: 8px;
+     margin-top: 8px;
     }
-  </style>
+
+    .setstandard {
+        position: absolute;
+        right: 0;
+        top: 8px;                    
+        width: 30%;
+        height: 15%;                
+        background-color: #272b36;
+        border-radius: 20px 0 0 20px;  
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;                 
+    }
+    .tag-text-standard{
+        font-size: 14px;
+        padding: 0 ;
+        position: relative;
+        left: 10px;
+        font-weight: bold;
+    }
+    .setstandard .standard-tag img {
+        width: 36px;
+        height: auto;
+        vertical-align: middle;
+        position: relative;
+        left: -3px;
+    }
+</style>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.0.2/dist/html2canvas-pro.min.js"></script>
 <div id="character-diy-container">
-  <!--++卡片预览++ -->
   <div class="preview-section">
-    <!--== 左侧区域 ==-->
     <div class="character-card" id="character-card-preview">
-      <!--左上角返回按钮-->
+      <!-- 返回按钮 -->
       <div class="return-text">
         <img src="https://patchwiki.biligame.com/images/starengine/a/a2/dab0cpmjfmrg52zxiy85k9u8ogq39h4.png" alt="白色箭头" class="arrow-white">
         <img src="https://patchwiki.biligame.com/images/starengine/5/59/57z8o94fihuxcdtxqe8hp810xxxwnmt.png" alt="蓝色箭头" class="arrow-blue">
         <img src="https://patchwiki.biligame.com/images/starengine/1/15/gocdrkztewy4q2mz4c9as0aqjumkxio.png" alt="绿色箭头" class="arrow-green">
         <span>返回</span>
       </div>
-      <!--角色立绘-->
+      <!-- 立绘 -->
       <div class="left-avatar">
         <img id="preview-avatar" src="https://patchwiki.biligame.com/images/starengine/e/e3/sqjeojqr22j322mp104zwhwztfvdrei.png" alt="avatar" draggable="false">
       </div>
-      <!-- 羁绊/皮肤预览按钮 -->
+      <!-- 点击预览 -->
       <div class="clickpreview-text" id="preview-clickpreview">
         <span>点击预览</span>
       </div>
-      <!-- 左侧U形半透明背景块（称号+角色名） -->
+      <!-- 左侧名字背景块 -->
       <div class="left-name-block">
         <span class="left-name1" id="preview-left-name1">看板娘</span>
         <span class="left-name2" id="preview-left-name2">米米</span>
       </div>
-      <!-- 亲密度区域（红心+细条+数值） -->
+      <!-- 亲密度 -->
       <div class="intimacy-area">
         <div class="hearts-row" id="preview-hearts-row">
-          <div class="heart-container">
-            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
-            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
-          </div>
-          <div class="heart-container">
-            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
-            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
-          </div>
-          <div class="heart-container">
-            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
-            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
-          </div>
-          <div class="heart-container">
-            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
-            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
-          </div>
-          <div class="heart-container">
-            <img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心">
-            <img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心">
-          </div>
+          <div class="heart-container"><img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心"><img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心"></div>
+          <div class="heart-container"><img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心"><img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心"></div>
+          <div class="heart-container"><img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心"><img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心"></div>
+          <div class="heart-container"><img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心"><img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心"></div>
+          <div class="heart-container"><img class="heart-empty" src="https://patchwiki.biligame.com/images/starengine/a/ab/03asrhese19lyar8duumeqgjoy9pa6y.png" alt="空红心"><img class="heart-filled" src="https://patchwiki.biligame.com/images/starengine/e/ed/dd62cv5tgqg33h38ayvjy7fpt0vso1g.png" alt="满红心"></div>
         </div>
         <div class="intimacy-bar"></div>
         <div class="intimacy-value" id="preview-intimacy-value">0/20</div>
       </div>
-      <!-- 左侧区域结束 -->
 
-      <!--== 右侧区域 ==-->
+      <!-- ===== 右侧内容区 ===== -->
       <div class="right-content">
-        <!--右侧名字和称号-->
-        <div class="right-name" id="preview-right-name">米米</div>
-        <div class="right-title" id="preview-right-title">看板娘</div>
-        
-        <!--右侧上部分四个功能标签-->
-        <div class="tags-row">
-          <div class="tag-item skill-tag">
-            <span class="tag-icon-skill">
-              <img id="skill-tag-icon" src="https://patchwiki.biligame.com/images/starengine/9/9a/cshh2jxyoo2lmldzobwbf6h3bnm7qb0.png" alt="技能">
-            </span>
-            <span class="tag-text" id="preview-tag-text-skill">技能</span>
-          </div>
-          <div class="tag-item upgrade-tag">
-            <span class="tag-icon">
-              <img src="https://patchwiki.biligame.com/images/starengine/7/7d/o8ntu3zcgioks77g02hkto43iol85mh.png" alt="升级">
-            </span>
-            <span class="tag-text" id="preview-tag-text-upgrade">升级</span>
-          </div>
-          <div class="tag-item potential-tag" id="preview-tag-potential-container">
-            <span class="tag-icon">
-              <img src="https://patchwiki.biligame.com/images/starengine/4/40/9bh39qnoyh2x10debeq0kgp7orwie7y.png" alt="潜能">
-            </span>
-            <span class="tag-text" id="preview-tag-text-potential">潜能</span>
-          </div>
-          <div class="tag-item archive-tag" id="preview-tag-archive-container">
-            <span class="tag-icon">
-              <img src="https://patchwiki.biligame.com/images/starengine/c/c8/ckhsfhqhmw0tmg5ry56b4eclr1t2ojg.png" alt="档案">
-            </span>
-            <span class="tag-text" id="preview-tag-text-archive">档案</span>
-          </div>
+        <!-- 顶部：四个功能标签 -->
+        <div class="function-tags" id="preview-function-tags">
+            <div class="function-tag file-tag"><span>档案</span></div>
+            <div class="function-tag contract-tag"><span>契约</span></div>
+            <div class="function-tag skin-tag"><span>皮肤</span></div>
+            <div class="function-tag expression-tag"><span>表情</span></div>
         </div>
 
-        <!--三维&合作挑战等级面板-->
-        <div class="default-panel">
-          <div class="background-wrapper">
-            <div class="stats-row">
-              <div class="stat-item">
-                <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/b/bc/q8dv71j98s29py0869spvugjizh2s5n.png" alt="攻击力"></span>
-                <span class="stat-value" id="preview-stat-value-atk">1</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/c/c7/5fsjolpeteic8g5qndh3cf162ke3mdp.png" alt="防御力"></span>
-                <span class="stat-value" id="preview-stat-value-def">1</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/6/6a/t7i9ykragp8li6t9v2vh37krc9yzfas.png" alt="血量"></span>
-                <span class="stat-value" id="preview-stat-value-hp">9</span>
-              </div>
-            </div>
-            <div class="challenge-row">
-              <span class="challenge-text" id="preview-challenge-text">合作挑战</span>
-              <span class="level-text" id="preview-level-text">等级</span>
-              <div class="number-with-icon">
-                <span class="level-icon"><img src="https://patchwiki.biligame.com/images/starengine/3/33/b23oz95dpmv73l571xvxsrylq5w28g7.png" alt="合作挑战等级"></span>
-                <span class="level-number" id="preview-level-number">6</span>
-              </div>
-              <div class="potential-trigger" id="preview-potential-trigger">
-                <span class="potential-icon"><img src="https://patchwiki.biligame.com/images/starengine/4/40/9bh39qnoyh2x10debeq0kgp7orwie7y.png" alt="潜能激发" style="width:22px; height:auto;"></span>
-                <span class="potential-text" id="preview-potential-text">潜能激发</span>
-              </div>
-            </div>
+        
+        <!-- 内部灰色内容区（留边） -->
+        <div class="right-inner">
+          <!-- 名字和称号 -->
+          <div class="right-name" id="preview-right-name">米米</div>
+          <div class="right-title" id="preview-right-title">看板娘</div>
+
+          <div class="setstandard">
+            <span class="tag-icon standard-tag"><img src="https://patchwiki.biligame.com/images/starengine/0/04/f7r5lfgijgz54za826go5t6u4x6ltf9.png" alt="常用"></span>
+            <span class="tag-text-standard" id="preview-tag-text-standard">设置为常用角色</span>
           </div>
           
-          <!--主动技能-->
-          <div class="skill-row active" id="active-skill-row">
-            <div class="skill-name-bg" id="preview-active-skill-name">主动技能：商品补货</div>
-            <div class="cd-item">
-              <span class="cd-icon"><img src="https://patchwiki.biligame.com/images/starengine/archive/5/54/20260325094535%21%E5%86%B7%E5%8D%B4.png" alt="冷却" style="width:26px; height:auto;"></span>
-              <span class="cd-time" id="preview-cd-time">3</span>
+          <!-- 四个切换标签 -->
+          <div class="tags-row">
+            <div class="tag-item skill-tag">
+              <span class="tag-icon-skill"><img id="skill-tag-icon" src="https://patchwiki.biligame.com/images/starengine/9/9a/cshh2jxyoo2lmldzobwbf6h3bnm7qb0.png" alt="技能"></span>
+              <span class="tag-text" id="preview-tag-text-skill">技能</span>
+            </div>
+            <div class="tag-item upgrade-tag">
+              <span class="tag-icon"><img src="https://patchwiki.biligame.com/images/starengine/7/7d/o8ntu3zcgioks77g02hkto43iol85mh.png" alt="升级"></span>
+              <span class="tag-text" id="preview-tag-text-upgrade">升级</span>
+            </div>
+            <div class="tag-item potential-tag" id="preview-tag-potential-container">
+              <span class="tag-icon"><img src="https://patchwiki.biligame.com/images/starengine/4/40/9bh39qnoyh2x10debeq0kgp7orwie7y.png" alt="潜能"></span>
+              <span class="tag-text" id="preview-tag-text-potential">潜能</span>
+            </div>
+            <div class="tag-item archive-tag" id="preview-tag-archive-container">
+              <span class="tag-icon"><img src="https://patchwiki.biligame.com/images/starengine/c/c8/ckhsfhqhmw0tmg5ry56b4eclr1t2ojg.png" alt="档案"></span>
+              <span class="tag-text" id="preview-tag-text-archive">档案</span>
             </div>
           </div>
-          <div class="skill-desc" id="preview-active-desc">丢弃全部手牌，随后获得原手牌数量{{#ff4646|+1}}张卡牌。</div>
 
-          <!--被动技能-->
-          <div class="skill-row passive">
-            <div class="skill-name-bg" id="preview-passive-skill-name">被动技能：过期回收</div>
-          </div>
-          <div class="skill-desc" id="preview-passive-desc">每丢弃1张战斗牌，获得1星币。</div>
-        </div>
-
-        <!--潜能激发面板-->
-        <div class="potential-panel" style="display: none;">
-          <div class="potential-bg">
-            <div class="char-potential">
-              <span id="char-potential-name">米米</span>
-              <span>－－潜能激发</span>
-            </div>
-            <div class="char-potential-desc">每累计获得25张卡牌，获得1个筹码。</div>
-          </div>
-          <!--潜能激发面板——未激活-->
-          <div class="potential-no">
-            <div class="potential-no-header">需要合作挑战等级6</div>
-            <div class="potential-no-items">
-              <div class="potential-no-items1">
-                <span style="color: #a2ff17;">4</span><span>/1</span>
-              </div>
-              <div class="potential-no-items2">
-                <div class="potential-no-items2-stuff">
-                  <img src="https://patchwiki.biligame.com/images/starengine/6/6c/2qj7axide90ao9sh6dk8g3kxg1yccg4.png" alt="材料">
-                  <div class="items2-stuff-group">
-                    <span style="color: #a2ff17;">11</span><span>/8</span>
-                  </div>
+          <!-- 默认面板（技能/升级） -->
+          <div class="default-panel">
+            <div class="background-wrapper">
+              <div class="stats-row">
+                <div class="stat-item">
+                  <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/b/bc/q8dv71j98s29py0869spvugjizh2s5n.png" alt="攻击力"></span>
+                  <span class="stat-value" id="preview-stat-value-atk">1</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/c/c7/5fsjolpeteic8g5qndh3cf162ke3mdp.png" alt="防御力"></span>
+                  <span class="stat-value" id="preview-stat-value-def">1</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-icon"><img src="https://patchwiki.biligame.com/images/starengine/6/6a/t7i9ykragp8li6t9v2vh37krc9yzfas.png" alt="血量"></span>
+                  <span class="stat-value" id="preview-stat-value-hp">9</span>
                 </div>
               </div>
-              <div class="potential-no-items3">
-                <span style="color: #a2ff17;">15364</span><span>/1000</span>
+              <div class="challenge-row">
+                <span class="challenge-text" id="preview-challenge-text">合作挑战</span>
+                <span class="level-text" id="preview-level-text">等级</span>
+                <div class="number-with-icon">
+                  <span class="level-icon"><img src="https://patchwiki.biligame.com/images/starengine/3/33/b23oz95dpmv73l571xvxsrylq5w28g7.png" alt="合作挑战等级"></span>
+                  <span class="level-number" id="preview-level-number">6</span>
+                </div>
+                <div class="potential-trigger" id="preview-potential-trigger">
+                  <span class="potential-icon"><img src="https://patchwiki.biligame.com/images/starengine/4/40/9bh39qnoyh2x10debeq0kgp7orwie7y.png" alt="潜能激发" style="width:22px; height:auto;"></span>
+                  <span class="potential-text" id="preview-potential-text">潜能激发</span>
+                </div>
               </div>
             </div>
-            <div class="potential-no-act"></div>
+            
+            <!-- 主动技能 -->
+            <div class="skill-row active" id="active-skill-row">
+              <div class="skill-name-bg" id="preview-active-skill-name">主动技能：商品补货</div>
+              <div class="cd-item">
+                <span class="cd-icon"><img src="https://patchwiki.biligame.com/images/starengine/archive/5/54/20260325094535%21%E5%86%B7%E5%8D%B4.png" alt="冷却" style="width:26px; height:auto;"></span>
+                <span class="cd-time" id="preview-cd-time">3</span>
+              </div>
+            </div>
+            <div class="skill-desc" id="preview-active-desc">丢弃全部手牌，随后获得原手牌数量{{#ff4646|+1}}张卡牌。</div>
+
+            <!-- 被动技能 -->
+            <div class="skill-row passive">
+              <div class="skill-name-bg" id="preview-passive-skill-name">被动技能：过期回收</div>
+            </div>
+            <div class="skill-desc" id="preview-passive-desc">每丢弃1张战斗牌，获得1星币。</div>
           </div>
-          <!--潜能激发面板——激活-->
-          <div class="potential-light"></div>
-        </div>
 
-        <!--档案面板-->
-        <div class="archive-panel" style="display: none;">
-          <div class="archive-bg">
-            <div class="char-archive">
-              <span id="char-archive-name">米米</span>
-              <span id="char-archive-title">看板娘</span>
+          <!-- 潜能面板（默认隐藏） -->
+          <div class="potential-panel" style="display: none;">
+            <div class="potential-bg">
+              <div class="char-potential">
+                <span id="char-potential-name">米米</span>
+                <span>－－潜能激发</span>
+              </div>
+              <div class="char-potential-desc">每累计获得25张卡牌，获得1个筹码。</div>
             </div>
-            <div class="char-archive-full-name" id="char-archive-desc-name"></div>
-            <div class="archive-detail">
-              <div>
-                <span>生日:</span>
-                <span id="char-archive-desc-birthday">8月2日</span>
+            <div class="potential-no">
+              <div class="potential-no-header">需要合作挑战等级6</div>
+              <div class="potential-no-items">
+                <div class="potential-no-items1"><span style="color: #a2ff17;">4</span><span>/1</span></div>
+                <div class="potential-no-items2">
+                  <div class="potential-no-items2-stuff">
+                    <img src="https://patchwiki.biligame.com/images/starengine/6/6c/2qj7axide90ao9sh6dk8g3kxg1yccg4.png" alt="材料">
+                    <div class="items2-stuff-group"><span style="color: #a2ff17;">11</span><span>/8</span></div>
+                  </div>
+                </div>
+                <div class="potential-no-items3"><span style="color: #a2ff17;">15364</span><span>/1000</span></div>
               </div>
-              <div>
-                <span>喜欢的食物:</span>
-                <span id="char-archive-desc-likefood">精致的便当盒</span>
+              <div class="potential-no-act"></div>
+            </div>
+            <div class="potential-light"></div>
+          </div>
+
+          <!-- 档案面板（默认隐藏） -->
+          <div class="archive-panel" style="display: none;">
+            <div class="archive-bg">
+              <div class="char-archive">
+                <span id="char-archive-name">米米</span>
+                <span id="char-archive-title">看板娘</span>
               </div>
-              <div class="char-archive-desc-box">
-                <span id="char-archive-desc-desc">&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。<br>&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。</span>
+              <div class="char-archive-full-name" id="char-archive-desc-name"></div>
+              <div class="archive-detail">
+                <div><span>生日:</span><span id="char-archive-desc-birthday">8月2日</span></div>
+                <div><span>喜欢的食物:</span><span id="char-archive-desc-likefood">精致的便当盒</span></div>
+                <div class="char-archive-desc-box"><span id="char-archive-desc-desc">&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。<br>&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。</span></div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!--技能模式切换按钮-->
-        <div class="skill-mode-wrapper">
-          <div class="skill-mode" id="skill-mode-preview">
-            <div class="skill-tabs-list">
-              <div class="circle active" data-mode="pve"><span>PVE</span></div>
-              <div class="circle" data-mode="pvp"><span>PVP</span></div>
-              <div class="active-indicator"></div>
+          <!-- 技能模式切换 -->
+          <div class="skill-mode-wrapper">
+            <div class="skill-mode" id="skill-mode-preview">
+              <div class="skill-tabs-list">
+                <div class="circle active" data-mode="pve"><span>PVE</span></div>
+                <div class="circle" data-mode="pvp"><span>PVP</span></div>
+                <div class="active-indicator"></div>
+              </div>
             </div>
           </div>
-        </div>
+        </div><!-- right-inner 结束 -->
+      </div><!-- .right-content 结束 -->
 
-        <!--右侧底部四个功能标签-->
-        <div class="function-tags" id="preview-function-tags">
-          <span class="function-tag file-tag">档案</span>
-          <span class="function-tag contract-tag">契约</span>
-          <span class="function-tag skin-tag">皮肤</span>
-          <span class="function-tag expression-tag">表情</span>
-        </div>
-      </div>
-
-      <!--左侧上层两侧浮动箭头-->
+      <!-- 浮动图标和水印 -->
       <img class="float-icon left-float" src="https://patchwiki.biligame.com/images/starengine/4/46/naoykg8q9dhochmupe2atjergapwl2u.png" alt="左侧图标">
       <img class="float-icon right-float" src="https://patchwiki.biligame.com/images/starengine/4/46/naoykg8q9dhochmupe2atjergapwl2u.png" alt="右侧图标">
-      
-      <!--水印-->
       <div class="watermark">星引擎Wiki@https://wiki.biligame.com/starengine</div>
     </div>
-    <!-- 右侧区域结束 -->
   </div>
 
-  <!--++卡片编辑++ -->
+  <!-- 编辑区保持不变 -->
   <div class="edit-section">
     <h3>⚙️ 编辑角色</h3>
-    
-    <!-- 固定内容，始终显示在顶部 -->
     <div class="control-group top-switches" style="flex-direction: column; flex-wrap: nowrap; width: 100%; box-sizing: border-box;">
-      <!-- 第一行：文件上传 -->
       <div class="control-group" style="flex-wrap: nowrap; margin-bottom: 10px;">
         <button class="btn" id="import-json-btn" style="background: #FF9800;">导入数据</button>
         <label>角色立绘上传</label>
         <button class="btn" id="upload-avatar-btn">选择图片</button>
         <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
-        
         <label style="margin-left: 15px;">技能图标上传</label>
         <button class="btn" id="upload-skill-icon-btn">选择图片</button>
         <input type="file" id="skill-icon-file-input" accept="image/*" style="display:none">
         <p style="font-size:12px; color:#aaa; margin:0; white-space: nowrap;">立绘上传后可使用鼠标滚轮缩放，左键拖拽调整位置</p>
       </div>
-    
-      <!-- 第二行：三个开关，包裹在一个不换行的容器中 -->
       <div class="switch-row" style="display: flex; flex-wrap: nowrap; align-items: center; gap: 15px; margin-bottom: 10px;">
-        <div class="control-item">
-          <label>是否显示潜能激发</label>
-          <div class="switch-btn" id="potential-switch"></div>
-        </div>
-        <div class="control-item">
-          <label>是否显示点击预览</label>
-          <div class="switch-btn" id="clickpreview-switch"></div>
-        </div>
-        <div class="control-item">
-          <label>是否显示技能模式切换</label>
-          <div class="switch-btn" id="skill-mode-switch"></div>
-        </div>
+        <div class="control-item"><label>是否显示潜能激发</label><div class="switch-btn" id="potential-switch"></div></div>
+        <div class="control-item"><label>是否显示点击预览</label><div class="switch-btn" id="clickpreview-switch"></div></div>
+        <div class="control-item"><label>是否显示技能模式切换</label><div class="switch-btn" id="skill-mode-switch"></div></div>
+        <div class="control-item"><label>是否常用</label><div class="switch-btn" id="set-standard-switch"></div></div>
       </div>
-    
-      <!-- 第三行：角色名、全名、称号 -->
       <div class="control-group" style="flex-wrap: nowrap;">
-        <label>角色名</label>
-        <div class="text-input" contenteditable="true" id="input-char-name">米米</div>
-        <label>全名</label>
-        <div class="text-input" contenteditable="true" id="input-archive-fullname"></div>
-        <label>称号</label>
-        <div class="text-input" contenteditable="true" id="input-char-title">看板娘</div>
+        <label>角色名</label><div class="text-input" contenteditable="true" id="input-char-name">米米</div>
+        <label>全名</label><div class="text-input" contenteditable="true" id="input-archive-fullname"></div>
+        <label>称号</label><div class="text-input" contenteditable="true" id="input-char-title">看板娘</div>
       </div>
     </div>
 
-    <!-- 默认编辑区（技能/升级标签激活时可见） -->
     <div id="skill-edit-area">
       <div class="control-group">
-        <label>攻击数值</label>
-        <div class="number-input" contenteditable="true" id="input-stat-atk">1</div>
-        <label>防御数值</label>
-        <div class="number-input" contenteditable="true" id="input-stat-def">1</div>
-        <label>血量数值</label>
-        <div class="number-input" contenteditable="true" id="input-stat-hp">9</div>
-        <div class="control-item">
-          <label>合作挑战等级</label>
-          <input type="number" class="number-input" id="input-level-number" min="0" max="6" value="5" step="1">
-        </div>
-        <div class="control-item">
-          <label>亲密度等级 (0-5)</label>
-          <input type="number" class="number-input" id="input-intimacy-level" min="0" max="5" value="3" step="1">
-        </div>
+        <label>攻击数值</label><div class="number-input" contenteditable="true" id="input-stat-atk">1</div>
+        <label>防御数值</label><div class="number-input" contenteditable="true" id="input-stat-def">1</div>
+        <label>血量数值</label><div class="number-input" contenteditable="true" id="input-stat-hp">9</div>
+        <div class="control-item"><label>合作挑战等级</label><input type="number" class="number-input" id="input-level-number" min="0" max="6" value="5" step="1"></div>
+        <div class="control-item"><label>亲密度等级 (0-5)</label><input type="number" class="number-input" id="input-intimacy-level" min="0" max="5" value="3" step="1"></div>
       </div>
-
-      <div class="control-group">
-        <label>主动技能名称</label>
-        <div class="text-input" contenteditable="true" id="input-active-name">商品补货</div>
-        <label>CD时间</label>
-        <div class="text-input" contenteditable="true" id="input-cd-time">3</div>
-        <label class="desc-label">主动技能描述</label>
-        <div class="textarea-input" contenteditable="true" id="input-active-desc">丢弃全部手牌，随后获得原手牌数量{{#ff4646|+1}}张卡牌。</div>
+      <div class="usecolor" style="font-size: 13px;padding: 4px 0 10px 0;">常用颜色代码:
+        {{#ff4646|<span style="color:#ff4646;">减益</span>}} &emsp;
+        {{#93ff46|<span style="color:#93ff46;">增益</span>}}&emsp;
+        {{#91e1ff|<span style="color:#91e1ff;">描述</span>}}&emsp;
+        {{#ffb423|<span style="color:#ffb423;">引用</span>}}&emsp;
       </div>
       <div class="control-group">
-        <label>被动技能名称</label>
-        <div class="text-input" contenteditable="true" id="input-passive-name">过期回收</div>
-        <label class="desc-label">被动技能描述</label>
-        <div class="textarea-input" contenteditable="true" id="input-passive-desc">每丢弃1张战斗牌，获得1星币。</div>
+        <label>主动技能名称</label><div class="text-input" contenteditable="true" id="input-active-name">商品补货</div>
+        <label>CD时间</label><div class="text-input" contenteditable="true" id="input-cd-time">3</div>
+        <label class="desc-label">主动技能描述</label><div class="textarea-input" contenteditable="true" id="input-active-desc">丢弃全部手牌，随后获得原手牌数量{{#ff4646|+1}}张卡牌。</div>
+      </div>
+      <div class="control-group">
+        <label>被动技能名称</label><div class="text-input" contenteditable="true" id="input-passive-name">过期回收</div>
+        <label class="desc-label">被动技能描述</label><div class="textarea-input" contenteditable="true" id="input-passive-desc">每丢弃1张战斗牌，获得1星币。</div>
       </div>
     </div>
 
-    <!-- 潜能编辑区 -->
     <div id="potential-edit-area" style="display: none;">
-      <div class="control-group">
-        <label>潜能激发描述</label>
-        <div class="textarea-input" contenteditable="true" id="input-potential-desc">每累计获得25张卡牌，获得1个筹码。</div>
-      </div>
-      <div class="control-group">
-        <div class="control-item">
-          <label>激发状态</label>
-          <div class="switch-btn" id="active-state-switch"></div>
-        </div>
-      </div>
+      <div class="control-group"><label>潜能激发描述</label><div class="textarea-input" contenteditable="true" id="input-potential-desc">每累计获得25张卡牌，获得1个筹码。</div></div>
+      <div class="control-group"><div class="control-item"><label>激发状态</label><div class="switch-btn" id="active-state-switch"></div></div></div>
       <div class="control-group" id="material-select-group" style="display: none;">
         <label>材料选择</label>
         <select id="material-select">
-          <option value="yangyan">阳炎徽章</option>
-          <option value="yueguang">月光徽章</option>
-          <option value="shanluan">山峦徽章</option>
-          <option value="bingyuan">冰原徽章</option>
-          <option value="daqi">大气徽章</option>
-          <option value="chuanhe">川河徽章</option>
-          <option value="rongyan">熔岩徽章</option>
-          <option value="yinying">阴影徽章</option>
+          <option value="yangyan">阳炎徽章</option><option value="yueguang">月光徽章</option><option value="shanluan">山峦徽章</option>
+          <option value="bingyuan">冰原徽章</option><option value="daqi">大气徽章</option><option value="chuanhe">川河徽章</option>
+          <option value="rongyan">熔岩徽章</option><option value="yinying">阴影徽章</option>
         </select>
       </div>
     </div>
 
-    <!-- 档案编辑区 -->
     <div id="archive-edit-area" style="display: none;">
-      <div class="control-group">
-        <label>生日</label>
-        <div class="text-input" contenteditable="true" id="input-archive-birthday">8月2日</div>
-      </div>
-      <div class="control-group">
-        <label>喜欢的食物</label>
-        <div class="text-input" contenteditable="true" id="input-archive-likefood">精致的便当盒</div>
-      </div>
-      <div class="control-group">
-        <label>背景描述</label>
-        <div class="textarea-input" contenteditable="true" id="input-archive-desc">&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。\n&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。</div>
-      </div>
+      <div class="control-group"><label>生日</label><div class="text-input" contenteditable="true" id="input-archive-birthday">8月2日</div></div>
+      <div class="control-group"><label>喜欢的食物</label><div class="text-input" contenteditable="true" id="input-archive-likefood">精致的便当盒</div></div>
+      <div class="control-group"><label>背景描述</label><div class="textarea-input" contenteditable="true" id="input-archive-desc">&emsp;&emsp;游戏《吉星派对》的全能看板娘，超级打工战士。便利店、酒吧、超市都有米米打工的身影，恋第一次见到米米就是在便利店。至于米米为什么会成为《吉星派对》游戏的看板娘就不得而知了。\n&emsp;&emsp;米米神出鬼没，可能会出现在各种打工场合，除了某些直播工作的时候形象没有任何变化。</div></div>
     </div>
 
     <div class="control-group">
       <button class="btn" id="save-img-btn">保存图片</button>
       <button class="btn secondary" id="reset-btn">重置默认</button>
     </div>
-    <!-- 导入数据用的隐藏文件选择器 -->
     <input type="file" id="import-file-input" accept="image/*" style="display:none;">
   </div>
 </div>
@@ -1514,5 +1551,5 @@
 <script src="characterdiy.js"></script>
 <script src="/js/nav.js"></script>
 <script src="/js/update-log.js" data-log-url="character-diy-update-log.json"></script>
-</body></html>
-  
+</body>
+</html>
