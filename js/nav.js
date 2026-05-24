@@ -107,4 +107,63 @@
   
     // ---------- 3. 将导航插入到 body 最前面 ----------
     document.body.insertAdjacentHTML('afterbegin', navHTML);
-  })();
+
+    // ================= 星空背景部分 =================
+    // 参考网址:https://blog.csdn.net/ungoing/article/details/125071691
+    if (!document.getElementById('stars-bg')) {
+      const starsStyle = document.createElement('style');
+      starsStyle.textContent = `
+        #stars-bg {
+          position: fixed;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          z-index: -1;
+          pointer-events: none;
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        .star {
+          display: block;
+          position: absolute;
+          border-radius: 50%;
+          box-shadow: 0.4px 0.4px 0.4px 0px #fff;
+          animation: twinkle var(--dur) ease-in-out infinite;
+          animation-delay: var(--delay);
+        }
+      `;
+      document.head.appendChild(starsStyle);
+
+      const container = document.createElement('div');
+      container.id = 'stars-bg';
+      document.body.appendChild(container);
+
+      const colorArr = ['#fff', 'skyblue', 'orange'];
+      const screenW = window.innerWidth;
+      const screenH = window.innerHeight;
+
+      for (let i = 0; i < 800; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const width = Math.random() * 3;
+        const colorIndex = Math.floor(Math.random() * 3);
+        const x = Math.floor(Math.random() * screenW);
+        const y = Math.floor(Math.random() * screenH);
+        star.style.width = Math.floor(width) + 'px';
+        star.style.height = Math.floor(width) + 'px';
+        star.style.background = colorArr[colorIndex];
+        star.style.left = x + 'px';
+        star.style.top = y + 'px';
+
+        // 随机闪烁参数
+        const duration = 2 + Math.random() * 4;   // 2~6 秒
+        const delay = Math.random() * 5;           // 0~5 秒
+        star.style.setProperty('--dur', duration + 's');
+        star.style.setProperty('--delay', delay + 's');
+
+        container.appendChild(star);
+      }
+    }
+})();
+
